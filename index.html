@@ -227,11 +227,19 @@
     width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--border);
     border-radius: 8px; padding: 10px; color: var(--text); margin-bottom: 9px;
   }
-  .file-row {
-    border: 1px dashed #B8C5F2; background: #F8FAFF; border-radius: 8px; padding: 12px;
-    text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 10px;
+  .upload-card {
+    border: 2px dashed #B8C5F2; background: #F8FAFF; border-radius: 8px; padding: 14px;
+    margin-bottom: 10px;
   }
-  .file-row input { width: 100%; margin-top: 9px; font-size: 12px; }
+  .upload-btn {
+    width: 100%; border: 0; border-radius: 8px; padding: 12px;
+    background: #E9EEFF; color: var(--blue); font-weight: 800; font-size: 13px;
+  }
+  .upload-file { display: none; }
+  .upload-name {
+    margin-top: 9px; color: var(--muted); font-size: 12px; text-align: center;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
   .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .toast {
     position: fixed; left: 50%; bottom: 92px; transform: translate(-50%, 12px);
@@ -240,6 +248,26 @@
     transition: .2s; z-index: 80; font-size: 12px; font-weight: 800; white-space: nowrap;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .auth-gate {
+    display: none;
+    min-height: calc(100vh - 178px);
+    padding: 14px;
+  }
+  .auth-gate.active { display: block; }
+  .auth-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 18px; box-shadow: var(--shadow);
+  }
+  .auth-card h1 {
+    font-family: Unbounded, sans-serif; font-size: 20px; line-height: 1.25; margin-bottom: 8px;
+  }
+  .auth-card p { color: var(--muted); font-size: 13px; line-height: 1.55; margin-bottom: 12px; }
+  .auth-actions { display: grid; gap: 8px; margin: 14px 0; }
+  .telegram-login-box {
+    display: flex; justify-content: center; min-height: 44px; align-items: center;
+    background: #F8FAFF; border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+  }
+  .app-shell.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -270,7 +298,22 @@
   </div>
 </header>
 
-<main>
+<section class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <h1>Войди через Telegram</h1>
+    <p>Так мы подтянем имя, username и фото профиля для рейтинга ELC Quest. Если открыть игру прямо внутри Telegram, вход произойдёт автоматически.</p>
+    <div class="auth-actions">
+      <button class="primary" onclick="openTelegramApp()">Открыть игру в Telegram</button>
+      <button class="secondary" onclick="showLoginWidget()">Войти на сайте</button>
+    </div>
+    <div class="telegram-login-box" id="telegram-login-box">
+      <span style="color:var(--muted);font-size:12px">Нажми “Войти на сайте”, чтобы показать кнопку Telegram Login</span>
+    </div>
+    <div class="notice" style="margin-top:12px;margin-bottom:0"><strong>Телефон отдельно:</strong> Telegram не отдаёт номер сайту автоматически. Номер можно получить только в боте, если игрок сам нажмёт “Поделиться контактом”.</div>
+  </div>
+</section>
+
+<main class="app-shell" id="app-shell">
   <section class="screen active" id="screen-missions">
     <div class="hero">
       <h1>Городская игра по английскому от ELC</h1>
@@ -328,7 +371,7 @@
   </section>
 </main>
 
-<nav class="bottom-nav">
+<nav class="bottom-nav app-shell" id="bottom-nav">
   <button class="nav-item active" data-screen="missions" onclick="showScreen('missions')">
     <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span>
     Задания
@@ -363,11 +406,12 @@
     <h2 id="submit-title">Задание</h2>
     <p id="submit-copy">Опиши выполнение и приложи файл. В реальной версии файл уйдет боту или в базу хранения.</p>
     <textarea class="input-area" id="submit-note" placeholder="Коротко опиши, что сделал. Например: заказал капучино на английском в кофейне на Абая."></textarea>
-    <label class="file-row">
-      Фото или видео для проверки
-      <input type="file" id="submit-file" accept="image/*,video/*">
-    </label>
-    <div class="notice"><strong>Для запуска с GitHub Pages:</strong> кнопка отправит данные в Telegram-бота через Web App. Сам файл бот попросит прислать в чат, либо позже подключим Supabase/Firebase Storage.</div>
+    <div class="upload-card">
+      <button class="upload-btn" onclick="document.getElementById('submit-file').click()">Выбрать фото или видео</button>
+      <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
+      <div class="upload-name" id="upload-name">Файл пока не выбран</div>
+    </div>
+    <div class="notice"><strong>Куда придёт файл:</strong> сейчас Web App передаёт заявку боту @ELCEnglishQuestBot. Следующий шаг — бот попросит отправить фото/видео в чат и перешлёт его админу ELC на проверку.</div>
     <div class="sheet-actions">
       <button class="secondary" onclick="closeSubmit()">Отмена</button>
       <button class="primary" onclick="submitMission()">Отправить</button>
@@ -379,9 +423,10 @@
 
 <script>
 const tg = window.Telegram?.WebApp;
-const BOT_USERNAME = 'AlmatyEnglishQuestBot';
-const APP_URL = 'https://pllato.github.io/elc-english-quest/';
-const STORAGE_KEY = 'elc_quest_state_v2';
+const BOT_USERNAME = 'ELCEnglishQuestBot';
+const APP_URL = 'https://pllato.github.io/elc-game/';
+const STORAGE_KEY = 'elc_quest_state_v3';
+const AUTH_KEY = 'elc_quest_auth_user_v1';
 
 const missions = [
   { id: '01', title: 'Coffee order challenge', place: 'Любая кофейня Алматы', xp: 20, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Закажи напиток полностью на английском. Доказательство: короткое видео 15-30 секунд или фото чека с голосовым комментарием.' },
@@ -416,7 +461,60 @@ if (tg) {
   tg.ready();
   tg.expand();
   const tgUser = tg.initDataUnsafe?.user;
-  if (tgUser) user = { ...user, ...tgUser };
+  if (tgUser) {
+    user = { ...user, ...tgUser };
+    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  }
+} else {
+  const savedUser = loadAuthUser();
+  if (savedUser) user = { ...user, ...savedUser };
+}
+
+function loadAuthUser() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function isAuthorized() {
+  return Boolean(tg?.initDataUnsafe?.user || loadAuthUser());
+}
+
+window.onTelegramAuth = function onTelegramAuth(authUser) {
+  user = { ...user, ...authUser };
+  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+  renderAll();
+  updateAuthGate();
+  showToast('Вход выполнен через Telegram');
+};
+
+function showLoginWidget() {
+  const box = document.getElementById('telegram-login-box');
+  box.innerHTML = '';
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://telegram.org/js/telegram-widget.js?22';
+  script.setAttribute('data-telegram-login', BOT_USERNAME);
+  script.setAttribute('data-size', 'large');
+  script.setAttribute('data-radius', '8');
+  script.setAttribute('data-request-access', 'write');
+  script.setAttribute('data-onauth', 'onTelegramAuth(user)');
+  box.appendChild(script);
+}
+
+function openTelegramApp() {
+  const url = `https://t.me/${BOT_USERNAME}?startapp=quest`;
+  if (tg) tg.openTelegramLink(url);
+  else window.location.href = url;
+}
+
+function updateAuthGate() {
+  const locked = !isAuthorized();
+  document.getElementById('auth-gate').classList.toggle('active', locked);
+  document.getElementById('app-shell').classList.toggle('hidden', locked);
+  document.getElementById('bottom-nav').classList.toggle('hidden', locked);
 }
 
 function loadState() {
@@ -550,16 +648,21 @@ function openSubmit(event, id) {
   document.getElementById('submit-copy').textContent = `${activeMission.place}. Проверка: ${activeMission.check === 'auto' ? 'лёгкое задание можно засчитать автоматически' : 'администратор ELC проверит выполнение вручную'}.`;
   document.getElementById('submit-note').value = '';
   document.getElementById('submit-file').value = '';
+  document.getElementById('upload-name').textContent = 'Файл пока не выбран';
   document.getElementById('submit').classList.add('open');
 }
 function closeSubmit() { document.getElementById('submit').classList.remove('open'); }
+function updateFileName() {
+  const input = document.getElementById('submit-file');
+  const label = document.getElementById('upload-name');
+  label.textContent = input.files.length ? input.files[0].name : 'Файл пока не выбран';
+}
 
 function submitMission() {
   if (!activeMission) return;
   const note = document.getElementById('submit-note').value.trim();
   const hasFile = document.getElementById('submit-file').files.length > 0;
-  state.statuses[activeMission.id] = activeMission.check === 'auto' ? 'done' : 'pending';
-  if (activeMission.check === 'auto') state.xp += activeMission.xp;
+  state.statuses[activeMission.id] = 'pending';
   saveState();
   const payload = {
     action: 'mission_submit',
@@ -577,7 +680,7 @@ function submitMission() {
   }
   closeSubmit();
   renderAll();
-  showToast(activeMission.check === 'auto' ? 'Задание зачтено, XP начислены' : 'Заявка ушла на проверку администратору');
+  showToast('Заявка создана. Отправь файл в бот для проверки');
 }
 
 function referralLink() {
@@ -609,10 +712,11 @@ function renderAll() {
   renderUser();
   renderMissions();
   renderLeaderboard();
+  updateAuthGate();
 }
 
 renderAll();
-if (!state.onboarded) setTimeout(openOnboarding, 350);
+if (isAuthorized() && !state.onboarded) setTimeout(openOnboarding, 350);
 </script>
 </body>
 </html>
