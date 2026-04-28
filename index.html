@@ -6,871 +6,613 @@
 <title>ELC English Quest</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700;900&family=Inter:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
   :root {
-    --elc-blue: #2B4EAE;
-    --elc-blue-dark: #1a3070;
-    --elc-blue-light: #3d65d4;
-    --elc-red: #E8452A;
-    --elc-red-light: #ff6b52;
-    --gold: #F59E0B;
-    --silver: #94A3B8;
-    --bronze: #CD7F32;
-    --bg: #F0F4FF;
+    --blue: #2B4EAE;
+    --blue-dark: #173172;
+    --red: #E8452A;
+    --green: #10B981;
+    --amber: #F59E0B;
+    --bg: #F2F5FF;
     --card: #FFFFFF;
-    --text: #0f1f4a;
-    --text-muted: #6b7db3;
-    --border: #dde5ff;
-    --success: #10B981;
+    --text: #10204A;
+    --muted: #6979AA;
+    --border: #DDE5FF;
+    --shadow: 0 16px 38px rgba(32, 55, 128, .12);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
   body {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
+    min-height: 100vh;
     background: var(--bg);
     color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    padding-bottom: 80px;
+    padding-bottom: 78px;
   }
+  button, input, textarea { font: inherit; }
+  button { cursor: pointer; }
 
-  /* ── HEADER ── */
   .header {
-    background: var(--elc-blue);
-    padding: 16px 20px 0;
-    position: relative;
-    overflow: hidden;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(255,255,255,.15), transparent 34%),
+      linear-gradient(140deg, var(--blue), var(--blue-dark));
+    color: #fff;
+    padding: 16px 16px 18px;
   }
-  .header::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 180px; height: 180px;
-    background: rgba(255,255,255,.05);
-    border-radius: 50%;
-  }
-  .header::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; left: -20px;
-    width: 140px; height: 140px;
-    background: rgba(255,255,255,.04);
-    border-radius: 50%;
-  }
-
-  .brand-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    position: relative;
-    z-index: 1;
-  }
+  .brand-row, .player-row, .mission-top, .leader-item, .course-card, .steps { display: flex; align-items: center; }
+  .brand-row { gap: 11px; margin-bottom: 14px; }
   .brand-logo {
-    width: 36px; height: 36px;
-    background: #fff;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: #fff; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex: 0 0 auto;
   }
-  .brand-logo svg { width: 28px; height: 28px; }
-  .brand-text { }
+  .brand-logo img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+  .brand-fallback {
+    width: 32px; height: 32px; border-radius: 9px; background: var(--blue);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: Unbounded, sans-serif; font-weight: 800; font-size: 12px;
+  }
   .brand-name {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 14px; font-weight: 700;
-    color: #fff; letter-spacing: .02em;
-    line-height: 1;
+    font-family: Unbounded, sans-serif; font-size: 15px; font-weight: 800;
+    line-height: 1.05; letter-spacing: 0;
   }
-  .brand-sub {
-    font-size: 10px; color: rgba(255,255,255,.55);
-    margin-top: 2px; letter-spacing: .04em;
+  .brand-badge {
+    display: inline-block; margin-left: 4px; padding: 2px 6px;
+    background: var(--red); border-radius: 6px; font-size: 9px; vertical-align: 2px;
   }
-
+  .brand-sub { margin-top: 3px; font-size: 10px; color: rgba(255,255,255,.7); }
   .player-row {
-    background: rgba(255,255,255,.12);
-    border-radius: 14px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px;
-    position: relative;
-    z-index: 1;
+    gap: 12px; padding: 12px; border-radius: 15px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.12);
   }
-  .player-av {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.2);
-    border: 2px solid rgba(255,255,255,.35);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Unbounded', sans-serif;
-    font-size: 13px; font-weight: 700;
-    color: #fff; flex-shrink: 0;
-    text-transform: uppercase;
+  .avatar {
+    width: 44px; height: 44px; border-radius: 50%; flex: 0 0 auto;
+    background: rgba(255,255,255,.18); border: 2px solid rgba(255,255,255,.28);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: Unbounded, sans-serif; font-size: 13px; font-weight: 800;
+    overflow: hidden; text-transform: uppercase;
   }
-  .player-details { flex: 1; min-width: 0; }
-  .player-name {
-    font-size: 14px; font-weight: 600;
-    color: #fff; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis;
-  }
-  .player-lvl { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 1px; }
-  .player-xp { text-align: right; flex-shrink: 0; }
-  .xp-big {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 22px; font-weight: 700;
-    color: #fff; line-height: 1;
-  }
-  .xp-small { font-size: 10px; color: rgba(255,255,255,.55); }
+  .avatar img, .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .player-main { flex: 1; min-width: 0; }
+  .player-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player-level { margin-top: 2px; font-size: 11px; color: rgba(255,255,255,.65); }
+  .xp { text-align: right; flex: 0 0 auto; }
+  .xp strong { display: block; font-family: Unbounded, sans-serif; font-size: 22px; line-height: 1; }
+  .xp span { font-size: 10px; color: rgba(255,255,255,.65); }
+  .progress { margin-top: 13px; }
+  .track { height: 6px; background: rgba(255,255,255,.2); border-radius: 999px; overflow: hidden; }
+  .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #fff, #FFB4A5); border-radius: inherit; transition: width .35s; }
+  .progress-copy { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: rgba(255,255,255,.62); }
 
-  .progress-wrap { margin-bottom: 16px; position: relative; z-index: 1; }
-  .progress-track {
-    height: 5px;
-    background: rgba(255,255,255,.2);
-    border-radius: 3px;
-    overflow: hidden;
+  .screen { display: none; padding: 14px 14px 18px; animation: fade .2s ease; }
+  .screen.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .hero {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 15px; margin-bottom: 12px; box-shadow: var(--shadow);
   }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #60a5fa, #a78bfa);
-    border-radius: 3px;
-    width: 60%;
-    transition: width 1s ease;
+  .hero h1 { font-family: Unbounded, sans-serif; font-size: 18px; line-height: 1.25; margin-bottom: 8px; }
+  .hero p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .primary, .secondary {
+    border: 0; border-radius: 8px; padding: 11px 10px; font-weight: 800; font-size: 12px;
   }
-  .progress-labels {
-    display: flex; justify-content: space-between;
-    margin-top: 4px;
-    font-size: 10px; color: rgba(255,255,255,.45);
+  .primary { background: var(--red); color: #fff; }
+  .secondary { background: #E9EEFF; color: var(--blue); }
+  .section-title {
+    margin: 14px 2px 9px; color: var(--muted); text-transform: uppercase;
+    font-size: 11px; font-weight: 800; letter-spacing: .06em;
   }
 
-  /* ── NAV ── */
-  .nav {
-    display: flex;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
+  .mission-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 13px; margin-bottom: 9px; transition: transform .16s, opacity .16s;
+  }
+  .mission-card.locked { opacity: .55; }
+  .mission-card:active { transform: scale(.99); }
+  .mission-top { justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .tags { display: flex; gap: 5px; flex-wrap: wrap; }
+  .tag { padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+  .easy { background: #DCFCE7; color: #166534; }
+  .med { background: #FEF3C7; color: #92400E; }
+  .hard { background: #FCE7F3; color: #9D174D; }
+  .social { background: #E0E7FF; color: #3730A3; }
+  .state { background: #E9EEFF; color: var(--blue); }
+  .pending { background: #FFF7ED; color: #C2410C; }
+  .done { background: #D1FAE5; color: #047857; }
+  .locked-tag { background: #E5E7EB; color: #6B7280; }
+  .xp-badge {
+    flex: 0 0 auto; font-family: Unbounded, sans-serif; font-size: 12px;
+    color: var(--blue); background: #E9EEFF; padding: 4px 9px; border-radius: 999px;
+  }
+  .mission-title { font-size: 15px; font-weight: 800; }
+  .mission-location { margin-top: 5px; font-size: 12px; color: var(--muted); }
+  .mission-desc { display: none; margin-top: 10px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+  .mission-card.expanded .mission-desc { display: block; }
+  .mission-btn {
+    width: 100%; display: none; margin-top: 12px; border: 0; border-radius: 8px;
+    padding: 11px; background: var(--blue); color: #fff; font-weight: 800; font-size: 13px;
+  }
+  .mission-card.expanded .mission-btn { display: block; }
+  .mission-btn:disabled { background: #9AA7CC; cursor: default; }
+
+  .notice {
+    background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; margin-bottom: 10px; font-size: 12px; line-height: 1.5; color: var(--muted);
+  }
+  .notice strong { color: var(--text); }
+
+  .leader-item {
+    gap: 11px; background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 11px; margin-bottom: 8px;
+  }
+  .leader-item.me { border-color: var(--blue); background: #F8FAFF; }
+  .rank { width: 26px; text-align: center; font-family: Unbounded, sans-serif; color: var(--blue); font-weight: 800; }
+  .leader-avatar {
+    width: 38px; height: 38px; border-radius: 50%; background: #E9EEFF;
+    color: var(--blue); display: flex; align-items: center; justify-content: center;
+    font-weight: 800; overflow: hidden; flex: 0 0 auto;
+  }
+  .leader-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .leader-copy { flex: 1; min-width: 0; }
+  .leader-name { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .leader-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .leader-xp { font-family: Unbounded, sans-serif; color: var(--blue); font-size: 12px; font-weight: 800; }
+
+  .profile-head { text-align: center; padding: 6px 0 14px; }
+  .profile-avatar {
+    width: 76px; height: 76px; margin: 0 auto 10px; border-radius: 50%;
+    background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: Unbounded, sans-serif; font-size: 23px; font-weight: 800; overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .profile-name { font-size: 18px; font-weight: 800; }
+  .profile-sub { margin-top: 3px; font-size: 12px; color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; margin-bottom: 10px; }
+  .stat { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px 6px; text-align: center; }
+  .stat strong { display: block; color: var(--blue); font-family: Unbounded, sans-serif; font-size: 17px; }
+  .stat span { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+  .ref-card {
+    background: linear-gradient(145deg, var(--blue-dark), var(--blue)); color: #fff;
+    border-radius: 8px; padding: 14px; margin: 10px 0;
+  }
+  .ref-card h3 { font-size: 15px; margin-bottom: 5px; }
+  .ref-card p { font-size: 12px; color: rgba(255,255,255,.72); line-height: 1.5; margin-bottom: 11px; }
+  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ref-grid button { border: 0; border-radius: 8px; padding: 10px; font-weight: 800; font-size: 12px; }
+  .share-btn { background: #fff; color: var(--blue); }
+  .copy-btn { background: rgba(255,255,255,.14); color: #fff; }
+  .course-card {
+    gap: 11px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+  }
+  .course-mark {
+    width: 42px; height: 42px; border-radius: 8px; background: #FDE8E4;
+    display: flex; align-items: center; justify-content: center; color: var(--red); font-weight: 900;
+  }
+  .course-copy { flex: 1; }
+  .course-copy strong { display: block; font-size: 13px; }
+  .course-copy span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+
+  .bottom-nav {
+    position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid var(--border);
+    display: flex; padding: 8px 0 12px; z-index: 30;
   }
   .nav-item {
-    flex: 1; padding: 11px 4px;
-    text-align: center;
-    font-size: 11px; font-weight: 600;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-bottom: 2.5px solid transparent;
-    transition: all .2s;
-    letter-spacing: .02em;
+    flex: 1; border: 0; background: transparent; color: var(--muted);
+    font-size: 10px; font-weight: 800; display: grid; place-items: center; gap: 3px;
   }
-  .nav-item.active {
-    color: var(--elc-blue);
-    border-bottom-color: var(--elc-blue);
-  }
-  .nav-icon { font-size: 16px; display: block; margin-bottom: 2px; }
+  .nav-item.active { color: var(--blue); }
+  .nav-icon { width: 23px; height: 23px; display: block; }
+  .nav-icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-  /* ── SCREENS ── */
-  .screen { display: none; padding: 16px; animation: fadeUp .25s ease; }
-  .screen.active { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  .overlay {
+    position: fixed; inset: 0; display: none; align-items: flex-end; background: rgba(10,18,44,.58); z-index: 50;
   }
-
-  /* ── SECTION LABEL ── */
-  .section-lbl {
-    font-size: 11px; font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: .07em;
-    margin: 0 0 10px;
+  .overlay.open { display: flex; }
+  .sheet {
+    width: 100%; background: #fff; border-radius: 18px 18px 0 0; padding: 18px 16px 26px;
+    animation: up .24s ease;
   }
-
-  /* ── MISSION CARDS ── */
-  .mission-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    transition: transform .15s, box-shadow .15s;
-    cursor: pointer;
+  @keyframes up { from { transform: translateY(100%); } to { transform: none; } }
+  .handle { width: 38px; height: 4px; border-radius: 99px; margin: 0 auto 15px; background: #D7DDEC; }
+  .sheet h2 { font-size: 19px; margin-bottom: 7px; }
+  .sheet p { font-size: 13px; line-height: 1.55; color: var(--muted); margin-bottom: 12px; }
+  .steps { align-items: stretch; gap: 8px; margin: 13px 0; }
+  .step { flex: 1; background: #F4F6FF; border: 1px solid var(--border); border-radius: 8px; padding: 9px; }
+  .step strong { display: block; font-size: 12px; margin-bottom: 3px; }
+  .step span { color: var(--muted); font-size: 10px; line-height: 1.35; display: block; }
+  .input-area {
+    width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px; color: var(--text); margin-bottom: 9px;
   }
-  .mission-card:active { transform: scale(.98); }
-  .mc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-  .mc-tags { display: flex; gap: 6px; }
-  .tag {
-    font-size: 10px; font-weight: 600;
-    padding: 3px 8px; border-radius: 20px;
-    letter-spacing: .03em;
+  .file-row {
+    border: 1px dashed #B8C5F2; background: #F8FAFF; border-radius: 8px; padding: 12px;
+    text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 10px;
   }
-  .tag-easy { background: #dcfce7; color: #15803d; }
-  .tag-med  { background: #fef3c7; color: #b45309; }
-  .tag-hard { background: #fce7f3; color: #be185d; }
-  .tag-team { background: #e0e7ff; color: #3730a3; }
-  .tag-social { background: #f0fdf4; color: #166534; }
-  .xp-badge {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 12px; font-weight: 700;
-    color: var(--elc-blue);
-    background: #e8eeff;
-    padding: 3px 10px; border-radius: 20px;
-  }
-  .mc-title {
-    font-size: 15px; font-weight: 600;
-    color: var(--text); margin-bottom: 5px;
-  }
-  .mc-loc {
-    font-size: 12px; color: var(--text-muted);
-    display: flex; align-items: center; gap: 5px;
-  }
-  .loc-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%; background: var(--elc-red);
-    flex-shrink: 0;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%,100%{ opacity:1; transform:scale(1); }
-    50%{ opacity:.6; transform:scale(1.3); }
-  }
-  .mc-desc {
-    font-size: 12px; color: var(--text-muted);
-    line-height: 1.55; margin-top: 8px;
-    display: none;
-  }
-  .mission-card.expanded .mc-desc { display: block; }
-  .mc-btn {
-    width: 100%; margin-top: 12px;
-    background: var(--elc-blue);
-    color: #fff; border: none;
-    border-radius: 12px; padding: 11px;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer; font-family: 'Inter', sans-serif;
-    transition: background .15s;
-    display: none;
-  }
-  .mission-card.expanded .mc-btn { display: block; }
-  .mc-btn:active { background: var(--elc-blue-dark); }
-
-  /* ── SUBMIT MODAL ── */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,.55);
-    z-index: 200;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 24px 24px 0 0;
-    padding: 20px 20px 32px;
-    width: 100%;
-    animation: slideUp .3s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: #e2e8f0; border-radius: 2px;
-    margin: 0 auto 16px;
-  }
-  .modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-  .modal-sub   { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
-  .upload-area {
-    border: 2px dashed var(--border);
-    border-radius: 14px;
-    padding: 24px;
-    text-align: center;
-    margin-bottom: 12px;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-  }
-  .upload-area:hover { border-color: var(--elc-blue); background: #f0f4ff; }
-  .upload-icon { font-size: 32px; margin-bottom: 8px; }
-  .upload-text { font-size: 13px; color: var(--text-muted); }
-  .upload-input { display: none; }
-  .preview-img {
-    width: 100%; border-radius: 12px;
-    display: none; margin-bottom: 12px;
-    max-height: 200px; object-fit: cover;
-  }
-  .submit-btn {
-    width: 100%;
-    background: var(--elc-red);
-    color: #fff; border: none;
-    border-radius: 12px; padding: 14px;
-    font-size: 14px; font-weight: 600;
-    cursor: pointer; font-family: 'Inter', sans-serif;
-    transition: background .15s;
-    margin-bottom: 8px;
-  }
-  .submit-btn:active { background: #c73b22; }
-  .cancel-btn {
-    width: 100%;
-    background: none; color: var(--text-muted);
-    border: none; padding: 10px;
-    font-size: 13px; cursor: pointer;
-    font-family: 'Inter', sans-serif;
-  }
-
-  /* ── SUCCESS TOAST ── */
+  .file-row input { width: 100%; margin-top: 9px; font-size: 12px; }
+  .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .toast {
-    position: fixed; bottom: 100px; left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--success);
-    color: #fff;
-    padding: 12px 24px;
-    border-radius: 100px;
-    font-size: 13px; font-weight: 600;
-    opacity: 0; transition: all .3s;
-    z-index: 300; white-space: nowrap;
+    position: fixed; left: 50%; bottom: 92px; transform: translate(-50%, 12px);
+    max-width: calc(100vw - 32px); background: #101B3D; color: #fff;
+    border-radius: 999px; padding: 11px 16px; opacity: 0; pointer-events: none;
+    transition: .2s; z-index: 80; font-size: 12px; font-weight: 800; white-space: nowrap;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* ── LEADERBOARD ── */
-  .leader-item {
-    background: var(--card);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin-bottom: 8px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: transform .15s;
-  }
-  .leader-item.me {
-    border-color: var(--elc-blue);
-    background: #f0f4ff;
-  }
-  .leader-item:active { transform: scale(.99); }
-  .rank-num {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 16px; font-weight: 700;
-    min-width: 28px; text-align: center;
-  }
-  .rank-1 { color: var(--gold); }
-  .rank-2 { color: var(--silver); }
-  .rank-3 { color: var(--bronze); }
-  .rank-other { color: var(--text-muted); font-size: 13px; }
-  .leader-av {
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 13px;
-    flex-shrink: 0;
-  }
-  .leader-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
-  .leader-sub { font-size: 11px; color: var(--text-muted); }
-  .leader-xp {
-    font-family: 'Unbounded', sans-serif;
-    font-size: 13px; font-weight: 700;
-    color: var(--elc-blue);
-  }
-  .prize-banner {
-    background: linear-gradient(135deg, var(--elc-blue), var(--elc-blue-light));
-    border-radius: 16px; padding: 14px 16px;
-    margin-bottom: 14px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .prize-icon { font-size: 28px; }
-  .prize-text { }
-  .prize-title { font-size: 13px; font-weight: 700; color: #fff; }
-  .prize-sub { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 2px; }
-
-  /* ── PROFILE ── */
-  .profile-av-big {
-    width: 72px; height: 72px;
-    border-radius: 50%;
-    background: var(--elc-blue);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Unbounded', sans-serif;
-    font-size: 24px; font-weight: 700;
-    color: #fff; margin: 0 auto 10px;
-    border: 3px solid #fff;
-    box-shadow: 0 4px 20px rgba(43,78,174,.3);
-  }
-  .profile-name { text-align: center; font-size: 17px; font-weight: 700; color: var(--text); }
-  .profile-level { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 16px; }
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 6px;
-    text-align: center;
-  }
-  .stat-val { font-family: 'Unbounded', sans-serif; font-size: 18px; font-weight: 700; color: var(--elc-blue); line-height: 1; }
-  .stat-lbl { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
-
-  .level-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 14px 16px; margin-bottom: 10px;
-  }
-  .level-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
-  .level-steps { display: flex; align-items: center; gap: 0; }
-  .level-step { flex: 1; text-align: center; }
-  .ls-dot {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700;
-    margin: 0 auto 4px;
-  }
-  .ls-dot.done { background: var(--elc-blue); color: #fff; }
-  .ls-dot.current { background: var(--elc-red); color: #fff; box-shadow: 0 0 0 3px #fde8e4; }
-  .ls-dot.next { background: #e8eeff; color: var(--text-muted); }
-  .ls-label { font-size: 9px; color: var(--text-muted); }
-  .ls-line { flex: 1; height: 2px; background: var(--border); margin: 0 4px; margin-bottom: 16px; }
-  .ls-line.done { background: var(--elc-blue); }
-
-  .ref-card {
-    background: linear-gradient(135deg, #1a3070, var(--elc-blue));
-    border-radius: 16px; padding: 16px;
-    margin-bottom: 10px;
-  }
-  .ref-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .ref-desc { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom: 12px; line-height: 1.5; }
-  .ref-btn {
-    width: 100%;
-    background: #fff; color: var(--elc-blue);
-    border: none; border-radius: 10px;
-    padding: 10px; font-size: 13px;
-    font-weight: 700; cursor: pointer;
-    font-family: 'Inter', sans-serif;
-  }
-  .ref-btn:active { background: #e8eeff; }
-
-  .course-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .course-icon {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: #fde8e4; display: flex;
-    align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-  }
-  .course-title { font-size: 13px; font-weight: 600; color: var(--text); }
-  .course-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .course-arrow { font-size: 18px; color: var(--text-muted); }
-
-  /* ── BOTTOM NAV ── */
-  .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: #fff;
-    border-top: 1px solid var(--border);
-    display: flex;
-    padding: 8px 0 12px;
-    z-index: 100;
-  }
-  .bn-item {
-    flex: 1; text-align: center;
-    font-size: 10px; font-weight: 600;
-    color: var(--text-muted); cursor: pointer;
-    transition: color .15s;
-  }
-  .bn-item.active { color: var(--elc-blue); }
-  .bn-icon { font-size: 22px; display: block; margin-bottom: 2px; }
-
-  .week-timer {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 14px;
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 14px;
-  }
-  .timer-icon { font-size: 20px; }
-  .timer-text { font-size: 12px; color: var(--text-muted); }
-  .timer-val { font-weight: 700; color: var(--elc-red); }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="header">
+<header class="header">
   <div class="brand-row">
     <div class="brand-logo">
-      <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M50 10 C50 10 35 28 28 45 C24 55 26 68 35 74 C40 77 46 76 50 72 C54 76 60 77 65 74 C74 68 76 55 72 45 C65 28 50 10 50 10Z" stroke="#2B4EAE" stroke-width="5" fill="none" stroke-linecap="round"/>
-        <path d="M50 10 L44 0 M50 10 L56 0 M50 10 L38 3 M50 10 L62 3" stroke="#2B4EAE" stroke-width="4" stroke-linecap="round"/>
-        <path d="M35 74 L25 88 M28 68 L15 78 M65 74 L75 88 M72 68 L85 78" stroke="#2B4EAE" stroke-width="4" stroke-linecap="round"/>
-      </svg>
+      <img src="logo.png" alt="ELC" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="brand-fallback" style="display:none">ELC</div>
     </div>
-    <div class="brand-text">
-      <div class="brand-name">ELC <span style="color:var(--elc-red);font-size:10px;background:#E8452A;color:#fff;padding:1px 6px;border-radius:5px;margin-left:2px;font-size:9px">QUEST</span></div>
-      <div class="brand-sub">English Language Centre · Almaty</div>
+    <div>
+      <div class="brand-name">ELC <span class="brand-badge">QUEST</span></div>
+      <div class="brand-sub">English Lifestyle Communication · Almaty</div>
     </div>
   </div>
 
   <div class="player-row">
-    <div class="player-av" id="hdr-initials">АИ</div>
-    <div class="player-details">
-      <div class="player-name" id="hdr-name">Айзат</div>
-      <div class="player-lvl">🌿 Explorer · Алматы</div>
+    <div class="avatar" id="header-avatar">EL</div>
+    <div class="player-main">
+      <div class="player-name" id="header-name">Гость ELC</div>
+      <div class="player-level" id="header-level">Rookie · Алматы</div>
     </div>
-    <div class="player-xp">
-      <div class="xp-big" id="hdr-xp">210</div>
-      <div class="xp-small">XP</div>
-    </div>
+    <div class="xp"><strong id="header-xp">0</strong><span>XP</span></div>
   </div>
 
-  <div class="progress-wrap">
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="progress-labels">
-      <span>Explorer</span>
-      <span id="progress-label">210 / 350 → Speaker</span>
-    </div>
+  <div class="progress">
+    <div class="track"><div class="fill" id="progress-fill"></div></div>
+    <div class="progress-copy"><span id="progress-from">Rookie</span><span id="progress-to">0 / 120 -> Explorer</span></div>
   </div>
-</div>
+</header>
 
-<!-- SCREENS -->
-<!-- MISSIONS -->
-<div class="screen active" id="screen-missions">
-  <div class="section-lbl" style="margin-top:4px">Активные задания</div>
-
-  <div class="mission-card" onclick="toggleMission(this,'01')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-easy">Лёгкое</span></div>
-      <span class="xp-badge">+20 XP</span>
-    </div>
-    <div class="mc-title">Coffee order challenge</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Любая кофейня Алматы</div>
-    <div class="mc-desc">Зайди в кофейню и сделай весь заказ на английском. Сними видео 15–30 сек как ты заказываешь. Отправь с подписью #01</div>
-    <button class="mc-btn" onclick="openSubmit(event,'01','Coffee order challenge')">Отправить выполнение</button>
-  </div>
-
-  <div class="mission-card" onclick="toggleMission(this,'03')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-easy">Лёгкое</span><span class="tag tag-social">Социальное</span></div>
-      <span class="xp-badge">+30 XP</span>
-    </div>
-    <div class="mc-title">Ask a stranger</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Арбат, пешеходная улица</div>
-    <div class="mc-desc">Подойди к незнакомому человеку и спроси что-нибудь по-английски. Сними момент на видео.</div>
-    <button class="mc-btn" onclick="openSubmit(event,'03','Ask a stranger')">Отправить выполнение</button>
-  </div>
-
-  <div class="mission-card" onclick="toggleMission(this,'07')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-med">Среднее</span><span class="tag tag-team">Команда</span></div>
-      <span class="xp-badge">+60 XP</span>
-    </div>
-    <div class="mc-title">Esentai speed debate</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Esentai Mall</div>
-    <div class="mc-desc">Найди партнёра из игры и устройте дебаты на английском — 2 минуты. Тему выбираете сами.</div>
-    <button class="mc-btn" onclick="openSubmit(event,'07','Esentai speed debate')">Отправить выполнение</button>
-  </div>
-
-  <div class="mission-card" onclick="toggleMission(this,'06')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-med">Среднее</span></div>
-      <span class="xp-badge">+50 XP</span>
-    </div>
-    <div class="mc-title">Kok-Tobe travel vlog</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Коктобе</div>
-    <div class="mc-desc">Запиши 60-секундный влог с Коктобе на английском — как YouTube-блогер для иностранной аудитории.</div>
-    <button class="mc-btn" onclick="openSubmit(event,'06','Kok-Tobe travel vlog')">Отправить выполнение</button>
-  </div>
-
-  <div class="mission-card" onclick="toggleMission(this,'13')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-hard">Сложное</span></div>
-      <span class="xp-badge">+80 XP</span>
-    </div>
-    <div class="mc-title">Central Park speech</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Центральный парк Алматы</div>
-    <div class="mc-desc">Произнеси публичную мини-речь на английском — 90 секунд. Тема: "Why Almaty is the best city in the world."</div>
-    <button class="mc-btn" onclick="openSubmit(event,'13','Central Park speech')">Отправить выполнение</button>
-  </div>
-
-  <div class="mission-card" onclick="toggleMission(this,'20')">
-    <div class="mc-top">
-      <div class="mc-tags"><span class="tag tag-hard">Сложное</span></div>
-      <span class="xp-badge">+120 XP</span>
-    </div>
-    <div class="mc-title">Almaty Ambassador</div>
-    <div class="mc-loc"><div class="loc-dot"></div>Аэропорт Алматы</div>
-    <div class="mc-desc">Найди иностранного туриста в аэропорту и поговори с ним по-английски минимум 3 минуты. Расскажи о городе.</div>
-    <button class="mc-btn" onclick="openSubmit(event,'20','Almaty Ambassador')">Отправить выполнение</button>
-  </div>
-</div>
-
-<!-- LEADERBOARD -->
-<div class="screen" id="screen-rating">
-  <div class="prize-banner">
-    <div class="prize-icon">🏆</div>
-    <div class="prize-text">
-      <div class="prize-title">Топ-1 этой недели — скидка 20% на курс ELC</div>
-      <div class="prize-sub">Рейтинг обновляется каждое воскресенье</div>
-    </div>
-  </div>
-
-  <div class="week-timer">
-    <div class="timer-icon">⏱</div>
-    <div class="timer-text">До конца недели: <span class="timer-val" id="timer-val">4д 12ч</span></div>
-  </div>
-
-  <div class="section-lbl">Рейтинг игроков</div>
-
-  <div class="leader-item">
-    <div class="rank-num rank-1">1</div>
-    <div class="leader-av" style="background:#fef3c7;color:#92400e">БЕ</div>
-    <div><div class="leader-name">@bekzat_alm</div><div class="leader-sub">Speaker · 12 заданий</div></div>
-    <div class="leader-xp">340 XP</div>
-  </div>
-  <div class="leader-item">
-    <div class="rank-num rank-2">2</div>
-    <div class="leader-av" style="background:#e1f5ee;color:#085041">ДА</div>
-    <div><div class="leader-name">@dana_speaks</div><div class="leader-sub">Speaker · 10 заданий</div></div>
-    <div class="leader-xp">290 XP</div>
-  </div>
-  <div class="leader-item">
-    <div class="rank-num rank-3">3</div>
-    <div class="leader-av" style="background:#eeedfe;color:#3c3489">НУ</div>
-    <div><div class="leader-name">@nurlan_eng</div><div class="leader-sub">Explorer · 9 заданий</div></div>
-    <div class="leader-xp">250 XP</div>
-  </div>
-  <div class="leader-item me">
-    <div class="rank-num rank-other">4</div>
-    <div class="leader-av" style="background:#e8eeff;color:#2B4EAE">АИ</div>
-    <div><div class="leader-name">Ты · @aizat_kz</div><div class="leader-sub">Explorer · 7 заданий</div></div>
-    <div class="leader-xp">210 XP</div>
-  </div>
-  <div class="leader-item">
-    <div class="rank-num rank-other">5</div>
-    <div class="leader-av" style="background:#fce7f3;color:#be185d">АГ</div>
-    <div><div class="leader-name">@aigerim_kz</div><div class="leader-sub">Explorer · 6 заданий</div></div>
-    <div class="leader-xp">180 XP</div>
-  </div>
-  <div class="leader-item">
-    <div class="rank-num rank-other">6</div>
-    <div class="leader-av" style="background:#fef3c7;color:#92400e">МА</div>
-    <div><div class="leader-name">@madina_alm</div><div class="leader-sub">Beginner · 5 заданий</div></div>
-    <div class="leader-xp">150 XP</div>
-  </div>
-  <div class="leader-item">
-    <div class="rank-num rank-other">7</div>
-    <div class="leader-av" style="background:#dcfce7;color:#15803d">АС</div>
-    <div><div class="leader-name">@askar_speaks</div><div class="leader-sub">Beginner · 4 задания</div></div>
-    <div class="leader-xp">110 XP</div>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div class="screen" id="screen-profile">
-  <div class="profile-av-big" id="prof-initials">АИ</div>
-  <div class="profile-name" id="prof-name">Айзат Иманова</div>
-  <div class="profile-level">🌿 Explorer · 4 место · Алматы</div>
-
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-val" id="stat-xp">210</div><div class="stat-lbl">XP</div></div>
-    <div class="stat-card"><div class="stat-val">7</div><div class="stat-lbl">Заданий</div></div>
-    <div class="stat-card"><div class="stat-val">3</div><div class="stat-lbl">Друзей</div></div>
-    <div class="stat-card"><div class="stat-val">2</div><div class="stat-lbl">Недели</div></div>
-  </div>
-
-  <div class="level-card">
-    <div class="level-title">Твой прогресс по уровням</div>
-    <div class="level-steps">
-      <div class="level-step">
-        <div class="ls-dot done">✓</div>
-        <div class="ls-label">Beginner</div>
-      </div>
-      <div class="ls-line done"></div>
-      <div class="level-step">
-        <div class="ls-dot current">🌿</div>
-        <div class="ls-label">Explorer</div>
-      </div>
-      <div class="ls-line"></div>
-      <div class="level-step">
-        <div class="ls-dot next">🗣</div>
-        <div class="ls-label">Speaker</div>
-      </div>
-      <div class="ls-line"></div>
-      <div class="level-step">
-        <div class="ls-dot next">🏆</div>
-        <div class="ls-label">Champion</div>
+<main>
+  <section class="screen active" id="screen-missions">
+    <div class="hero">
+      <h1>Городская игра по английскому от ELC</h1>
+      <p>Выполняй задания в реальных местах Алматы, говори на английском, отправляй доказательства и поднимайся в рейтинге недели.</p>
+      <div class="hero-actions">
+        <button class="primary" onclick="openOnboarding()">Как играть</button>
+        <button class="secondary" onclick="showScreen('profile')">Мой прогресс</button>
       </div>
     </div>
-  </div>
+    <div class="notice"><strong>Задания открываются постепенно.</strong> Выполни активное задание, дождись проверки или статуса ожидания, и следующий уровень появится автоматически.</div>
+    <div class="section-title">Текущая цепочка</div>
+    <div id="missions-list"></div>
+  </section>
 
-  <div class="ref-card">
-    <div class="ref-title">Пригласи друга — получи +50 XP</div>
-    <div class="ref-desc">Когда друг выполнит первое задание, тебе автоматически начислятся бонусные очки.</div>
-    <button class="ref-btn" onclick="copyRef()">📋 Скопировать реферальную ссылку</button>
-  </div>
-
-  <div class="course-card" onclick="openCourse()">
-    <div class="course-icon">📚</div>
-    <div>
-      <div class="course-title">Курсы ELC — разговорный английский</div>
-      <div class="course-sub">Первый урок бесплатно · elc-kids.kz</div>
+  <section class="screen" id="screen-rating">
+    <div class="hero">
+      <h1>Рейтинг недели</h1>
+      <p>Очки начисляются после автозачёта или проверки администратором. Победитель недели получает бонус от ELC.</p>
     </div>
-    <div class="course-arrow">›</div>
-  </div>
-</div>
+    <div id="leaderboard"></div>
+  </section>
 
-<!-- BOTTOM NAV -->
-<div class="bottom-nav">
-  <div class="bn-item active" onclick="showScreen('missions',this)">
-    <span class="bn-icon">📋</span>Задания
-  </div>
-  <div class="bn-item" onclick="showScreen('rating',this)">
-    <span class="bn-icon">🏆</span>Рейтинг
-  </div>
-  <div class="bn-item" onclick="showScreen('profile',this)">
-    <span class="bn-icon">👤</span>Профиль
-  </div>
-</div>
-
-<!-- SUBMIT MODAL -->
-<div class="modal-overlay" id="submit-modal" onclick="closeModalOutside(event)">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-mission-title">Coffee order challenge</div>
-    <div class="modal-sub">Загрузи фото или видео как доказательство выполнения. Лёгкие задания засчитываются автоматически, сложные проверяет преподаватель.</div>
-    <img class="preview-img" id="preview-img" src="" alt="preview">
-    <div class="upload-area" onclick="document.getElementById('file-input').click()">
-      <div class="upload-icon">📸</div>
-      <div class="upload-text">Нажми чтобы выбрать фото или видео</div>
+  <section class="screen" id="screen-profile">
+    <div class="profile-head">
+      <div class="profile-avatar" id="profile-avatar">EL</div>
+      <div class="profile-name" id="profile-name">Гость ELC</div>
+      <div class="profile-sub" id="profile-sub">Rookie · Алматы</div>
     </div>
-    <input type="file" class="upload-input" id="file-input" accept="image/*,video/*" onchange="previewFile(this)">
-    <button class="submit-btn" onclick="submitMission()">Отправить на проверку</button>
-    <button class="cancel-btn" onclick="closeModal()">Отмена</button>
+
+    <div class="stats">
+      <div class="stat"><strong id="stat-xp">0</strong><span>XP</span></div>
+      <div class="stat"><strong id="stat-done">0</strong><span>Готово</span></div>
+      <div class="stat"><strong id="stat-pending">0</strong><span>Проверка</span></div>
+      <div class="stat"><strong id="stat-ref">0</strong><span>Друзей</span></div>
+    </div>
+
+    <div class="ref-card">
+      <h3>Пригласи друга и получи +50 XP</h3>
+      <p>Кнопка “В Telegram” открывает стандартное окно отправки. Игрок выбирает любой чат или контакт из Telegram, и туда уходит приглашение с твоей ссылкой.</p>
+      <div class="ref-grid">
+        <button class="share-btn" onclick="shareReferral()">В Telegram</button>
+        <button class="copy-btn" onclick="copyReferral()">Скопировать</button>
+      </div>
+    </div>
+
+    <div class="notice"><strong>Фото профиля.</strong> Если Telegram передаст аватар в Web App, мы покажем его сразу. Для стабильной загрузки фото всех игроков бот должен дополнительно получать аватар через Telegram Bot API.</div>
+
+    <div class="course-card" onclick="openCourse()">
+      <div class="course-mark">ELC</div>
+      <div class="course-copy">
+        <strong>English Lifestyle Communication</strong>
+        <span>Разговорный английский и городская практика</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="bottom-nav">
+  <button class="nav-item active" data-screen="missions" onclick="showScreen('missions')">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg></span>
+    Задания
+  </button>
+  <button class="nav-item" data-screen="rating" onclick="showScreen('rating')">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 6h3a3 3 0 0 1-3 3M7 6H4a3 3 0 0 0 3 3"/></svg></span>
+    Рейтинг
+  </button>
+  <button class="nav-item" data-screen="profile" onclick="showScreen('profile')">
+    <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg></span>
+    Профиль
+  </button>
+</nav>
+
+<div class="overlay" id="onboarding" onclick="closeOverlay(event, 'onboarding')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h2>Как работает ELC Quest</h2>
+    <p>Это городская игра: ты открываешь задание, выполняешь его в Алматы, отправляешь фото, видео или комментарий и получаешь XP после проверки.</p>
+    <div class="steps">
+      <div class="step"><strong>1. Выбери</strong><span>Открыто первое активное задание.</span></div>
+      <div class="step"><strong>2. Сделай</strong><span>Говори на английском в реальной ситуации.</span></div>
+      <div class="step"><strong>3. Отправь</strong><span>Лёгкие задания можно засчитывать авто, сложные смотрит админ.</span></div>
+    </div>
+    <button class="primary" style="width:100%" onclick="finishOnboarding()">Начать игру</button>
   </div>
 </div>
 
-<!-- TOAST -->
+<div class="overlay" id="submit" onclick="closeOverlay(event, 'submit')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h2 id="submit-title">Задание</h2>
+    <p id="submit-copy">Опиши выполнение и приложи файл. В реальной версии файл уйдет боту или в базу хранения.</p>
+    <textarea class="input-area" id="submit-note" placeholder="Коротко опиши, что сделал. Например: заказал капучино на английском в кофейне на Абая."></textarea>
+    <label class="file-row">
+      Фото или видео для проверки
+      <input type="file" id="submit-file" accept="image/*,video/*">
+    </label>
+    <div class="notice"><strong>Для запуска с GitHub Pages:</strong> кнопка отправит данные в Telegram-бота через Web App. Сам файл бот попросит прислать в чат, либо позже подключим Supabase/Firebase Storage.</div>
+    <div class="sheet-actions">
+      <button class="secondary" onclick="closeSubmit()">Отмена</button>
+      <button class="primary" onclick="submitMission()">Отправить</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-// ── Telegram Web App init ──
 const tg = window.Telegram?.WebApp;
+const BOT_USERNAME = 'AlmatyEnglishQuestBot';
+const APP_URL = 'https://pllato.github.io/elc-english-quest/';
+const STORAGE_KEY = 'elc_quest_state_v2';
+
+const missions = [
+  { id: '01', title: 'Coffee order challenge', place: 'Любая кофейня Алматы', xp: 20, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Закажи напиток полностью на английском. Доказательство: короткое видео 15-30 секунд или фото чека с голосовым комментарием.' },
+  { id: '02', title: 'Metro directions', place: 'Станция метро Байконур', xp: 25, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Объясни на английском, как добраться от станции до ближайшего ориентира. Доказательство: видео 30 секунд.' },
+  { id: '03', title: 'Ask a stranger', place: 'Арбат', xp: 35, level: 'easy', tags: ['Социальное'], check: 'manual', desc: 'Вежливо задай прохожему один простой вопрос на английском. Важно: сначала спроси разрешение на съёмку.' },
+  { id: '04', title: 'Museum mini guide', place: 'Центральный государственный музей', xp: 45, level: 'med', tags: ['Среднее'], check: 'manual', desc: 'Запиши мини-экскурсию на английском: 3 факта о месте или экспонате.' },
+  { id: '05', title: 'Green Bazaar shopping', place: 'Зелёный базар', xp: 50, level: 'med', tags: ['Среднее'], check: 'manual', desc: 'Сыграй ситуацию покупки на английском: спроси цену, попроси рекомендацию, поблагодари.' },
+  { id: '06', title: 'Kok-Tobe travel vlog', place: 'Коктобе', xp: 60, level: 'med', tags: ['Влог'], check: 'manual', desc: 'Сними 60-секундный travel vlog на английском для гостя Алматы.' },
+  { id: '07', title: 'Esentai speed debate', place: 'Esentai Mall', xp: 70, level: 'med', tags: ['Команда'], check: 'manual', desc: 'Найди игрока или друга и проведите короткие дебаты на английском. Формат: 1 минута за, 1 минута против.' },
+  { id: '08', title: 'Hotel reception roleplay', place: 'Любой отель или лобби-зона', xp: 75, level: 'hard', tags: ['Сложное'], check: 'manual', desc: 'Разыграй ситуацию на ресепшене: бронирование, вопрос о завтраке, просьба о позднем выезде.' },
+  { id: '09', title: 'Central Park speech', place: 'Центральный парк', xp: 90, level: 'hard', tags: ['Сложное'], check: 'manual', desc: 'Произнеси публичную мини-речь на английском: Why Almaty is a great city to live in.' },
+  { id: '10', title: 'Almaty Ambassador', place: 'Аэропорт Алматы', xp: 120, level: 'hard', tags: ['Финал'], check: 'manual', desc: 'Поговори с иностранным гостем минимум 3 минуты и расскажи о городе. Съёмка только с разрешения собеседника.' }
+];
+
+const demoLeaders = [
+  { name: '@bekzat_alm', sub: 'Speaker · 12 заданий', xp: 340 },
+  { name: '@dana_speaks', sub: 'Speaker · 10 заданий', xp: 290 },
+  { name: '@nurlan_eng', sub: 'Explorer · 9 заданий', xp: 250 }
+];
+
+let state = loadState();
+let activeMission = null;
+let user = {
+  id: 'demo',
+  first_name: 'Гость',
+  last_name: '',
+  username: '',
+  photo_url: ''
+};
+
 if (tg) {
   tg.ready();
   tg.expand();
-  const user = tg.initDataUnsafe?.user;
-  if (user) {
-    const name = user.first_name || 'Игрок';
-    const initials = name.slice(0,2).toUpperCase();
-    document.getElementById('hdr-name').textContent = name;
-    document.getElementById('hdr-initials').textContent = initials;
-    document.getElementById('prof-name').textContent = name + ' ' + (user.last_name || '');
-    document.getElementById('prof-initials').textContent = initials;
-  }
+  const tgUser = tg.initDataUnsafe?.user;
+  if (tgUser) user = { ...user, ...tgUser };
 }
 
-// ── Navigation ──
-function showScreen(name, el) {
+function loadState() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { xp: 0, statuses: {}, referrals: 0, onboarded: false };
+  } catch {
+    return { xp: 0, statuses: {}, referrals: 0, onboarded: false };
+  }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function initials(name) {
+  const parts = String(name || 'ELC').trim().split(/\s+/).slice(0, 2);
+  return parts.map(p => p[0]).join('').toUpperCase() || 'EL';
+}
+function fullName() {
+  return [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Гость ELC';
+}
+function levelByXP(xp) {
+  if (xp >= 500) return { name: 'Champion', next: 700 };
+  if (xp >= 260) return { name: 'Speaker', next: 500 };
+  if (xp >= 120) return { name: 'Explorer', next: 260 };
+  return { name: 'Rookie', next: 120 };
+}
+function setAvatar(el, fallback) {
+  if (user.photo_url) el.innerHTML = `<img src="${user.photo_url}" alt="">`;
+  else el.textContent = fallback;
+}
+
+function renderUser() {
+  const name = fullName();
+  const init = initials(name);
+  const level = levelByXP(state.xp);
+  document.getElementById('header-name').textContent = name;
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('header-level').textContent = `${level.name} · Алматы`;
+  document.getElementById('profile-sub').textContent = `${level.name} · Алматы`;
+  setAvatar(document.getElementById('header-avatar'), init);
+  setAvatar(document.getElementById('profile-avatar'), init);
+  document.getElementById('header-xp').textContent = state.xp;
+  document.getElementById('stat-xp').textContent = state.xp;
+  document.getElementById('stat-done').textContent = Object.values(state.statuses).filter(s => s === 'done').length;
+  document.getElementById('stat-pending').textContent = Object.values(state.statuses).filter(s => s === 'pending').length;
+  document.getElementById('stat-ref').textContent = state.referrals || 0;
+  const prev = level.name === 'Rookie' ? 0 : level.name === 'Explorer' ? 120 : level.name === 'Speaker' ? 260 : 500;
+  const pct = Math.max(0, Math.min(100, ((state.xp - prev) / (level.next - prev)) * 100));
+  document.getElementById('progress-fill').style.width = `${pct}%`;
+  document.getElementById('progress-from').textContent = level.name;
+  document.getElementById('progress-to').textContent = `${state.xp} / ${level.next} -> ${level.name === 'Champion' ? 'ELC Legend' : nextLevelName(level.name)}`;
+}
+function nextLevelName(name) {
+  return { Rookie: 'Explorer', Explorer: 'Speaker', Speaker: 'Champion', Champion: 'ELC Legend' }[name];
+}
+
+function unlockedIndex() {
+  const statuses = state.statuses;
+  let idx = 0;
+  for (let i = 0; i < missions.length; i++) {
+    if (statuses[missions[i].id] === 'done' || statuses[missions[i].id] === 'pending') idx = i + 1;
+    else break;
+  }
+  return Math.min(idx, missions.length - 1);
+}
+
+function renderMissions() {
+  const list = document.getElementById('missions-list');
+  const openUntil = unlockedIndex();
+  list.innerHTML = missions.map((m, index) => {
+    const status = state.statuses[m.id] || 'new';
+    const locked = index > openUntil;
+    const statusTag = locked ? 'Закрыто' : status === 'done' ? 'Зачтено' : status === 'pending' ? 'На проверке' : m.check === 'auto' ? 'Авто' : 'Админ';
+    const statusClass = locked ? 'locked-tag' : status === 'done' ? 'done' : status === 'pending' ? 'pending' : 'state';
+    const btnText = locked ? 'Откроется после предыдущего задания' : status === 'done' ? 'Задание уже зачтено' : status === 'pending' ? 'Ожидает проверки' : 'Отправить выполнение';
+    return `
+      <article class="mission-card ${locked ? 'locked' : ''}" onclick="toggleMission(event, this)">
+        <div class="mission-top">
+          <div class="tags">
+            <span class="tag ${m.level}">${m.tags[0]}</span>
+            <span class="tag ${statusClass}">${statusTag}</span>
+          </div>
+          <span class="xp-badge">+${m.xp} XP</span>
+        </div>
+        <div class="mission-title">${String(index + 1).padStart(2, '0')}. ${m.title}</div>
+        <div class="mission-location">${m.place}</div>
+        <div class="mission-desc">${m.desc}</div>
+        <button class="mission-btn" ${locked || status !== 'new' ? 'disabled' : ''} onclick="openSubmit(event, '${m.id}')">${btnText}</button>
+      </article>`;
+  }).join('');
+}
+
+function renderLeaderboard() {
+  const list = document.getElementById('leaderboard');
+  const me = { name: user.username ? `Ты · @${user.username}` : `Ты · ${fullName()}`, sub: `${levelByXP(state.xp).name} · ${Object.keys(state.statuses).length} заданий`, xp: state.xp, me: true };
+  const leaders = [...demoLeaders, me].sort((a, b) => b.xp - a.xp);
+  list.innerHTML = leaders.map((p, i) => `
+    <div class="leader-item ${p.me ? 'me' : ''}">
+      <div class="rank">${i + 1}</div>
+      <div class="leader-avatar">${p.me && user.photo_url ? `<img src="${user.photo_url}" alt="">` : initials(p.name.replace('Ты · ', ''))}</div>
+      <div class="leader-copy"><div class="leader-name">${p.name}</div><div class="leader-sub">${p.sub}</div></div>
+      <div class="leader-xp">${p.xp} XP</div>
+    </div>
+  `).join('');
+}
+
+function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.bn-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-  el.classList.add('active');
-  window.scrollTo(0,0);
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
+  document.getElementById(`screen-${name}`).classList.add('active');
+  window.scrollTo(0, 0);
+  renderAll();
+}
+function toggleMission(event, card) {
+  if (event.target.tagName === 'BUTTON') return;
+  document.querySelectorAll('.mission-card').forEach(c => c !== card && c.classList.remove('expanded'));
+  card.classList.toggle('expanded');
+}
+function openOnboarding() { document.getElementById('onboarding').classList.add('open'); }
+function finishOnboarding() {
+  state.onboarded = true;
+  saveState();
+  document.getElementById('onboarding').classList.remove('open');
+}
+function closeOverlay(event, id) {
+  if (event.target.id === id) document.getElementById(id).classList.remove('open');
 }
 
-// ── Mission expand ──
-let currentMission = null;
-function toggleMission(card, id) {
-  if (event.target.classList.contains('mc-btn')) return;
-  if (card.classList.contains('expanded')) {
-    card.classList.remove('expanded');
-  } else {
-    document.querySelectorAll('.mission-card').forEach(c => c.classList.remove('expanded'));
-    card.classList.add('expanded');
-  }
+function openSubmit(event, id) {
+  event.stopPropagation();
+  activeMission = missions.find(m => m.id === id);
+  document.getElementById('submit-title').textContent = activeMission.title;
+  document.getElementById('submit-copy').textContent = `${activeMission.place}. Проверка: ${activeMission.check === 'auto' ? 'лёгкое задание можно засчитать автоматически' : 'администратор ELC проверит выполнение вручную'}.`;
+  document.getElementById('submit-note').value = '';
+  document.getElementById('submit-file').value = '';
+  document.getElementById('submit').classList.add('open');
 }
+function closeSubmit() { document.getElementById('submit').classList.remove('open'); }
 
-// ── Submit modal ──
-let activeMissionId = null;
-function openSubmit(e, id, title) {
-  e.stopPropagation();
-  activeMissionId = id;
-  document.getElementById('modal-mission-title').textContent = title;
-  document.getElementById('preview-img').style.display = 'none';
-  document.getElementById('file-input').value = '';
-  document.getElementById('submit-modal').classList.add('open');
-}
-function closeModal() {
-  document.getElementById('submit-modal').classList.remove('open');
-}
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('submit-modal')) closeModal();
-}
-function previewFile(input) {
-  if (!input.files.length) return;
-  const file = input.files[0];
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = document.getElementById('preview-img');
-      img.src = e.target.result;
-      img.style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
-}
 function submitMission() {
-  closeModal();
-  // Notify Telegram
-  if (tg) tg.sendData(JSON.stringify({ action: 'submit', mission_id: activeMissionId }));
-  // Show toast
-  showToast('Задание отправлено! +XP придут после проверки 🎉');
-  // Add XP (demo)
-  addXP(20);
+  if (!activeMission) return;
+  const note = document.getElementById('submit-note').value.trim();
+  const hasFile = document.getElementById('submit-file').files.length > 0;
+  state.statuses[activeMission.id] = activeMission.check === 'auto' ? 'done' : 'pending';
+  if (activeMission.check === 'auto') state.xp += activeMission.xp;
+  saveState();
+  const payload = {
+    action: 'mission_submit',
+    mission_id: activeMission.id,
+    mission_title: activeMission.title,
+    check: activeMission.check,
+    note,
+    has_file: hasFile,
+    user_id: user.id,
+    username: user.username || ''
+  };
+  if (tg) {
+    tg.sendData(JSON.stringify(payload));
+    tg.openTelegramLink(`https://t.me/${BOT_USERNAME}`);
+  }
+  closeSubmit();
+  renderAll();
+  showToast(activeMission.check === 'auto' ? 'Задание зачтено, XP начислены' : 'Заявка ушла на проверку администратору');
 }
 
-// ── XP ──
-let currentXP = 210;
-function addXP(amount) {
-  currentXP += amount;
-  document.getElementById('hdr-xp').textContent = currentXP;
-  document.getElementById('stat-xp').textContent = currentXP;
-  const pct = Math.min(100, Math.round((currentXP / 350) * 100));
-  document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('progress-label').textContent = currentXP + ' / 350 → Speaker';
+function referralLink() {
+  const ref = user.username || user.id || 'demo';
+  return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(ref)}`;
 }
-
-// ── Toast ──
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function shareReferral() {
+  const text = 'Присоединяйся к ELC English Quest: городская игра по английскому в Алматы.';
+  const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink())}&text=${encodeURIComponent(text)}`;
+  if (tg) tg.openTelegramLink(url);
+  else window.open(url, '_blank');
 }
-
-// ── Referral ──
-function copyRef() {
-  const link = 'https://t.me/AlmatyEnglishQuestBot?start=ref_demo';
-  navigator.clipboard?.writeText(link).catch(() => {});
-  showToast('Ссылка скопирована! Отправь другу 🔗');
+function copyReferral() {
+  navigator.clipboard?.writeText(referralLink());
+  showToast('Реферальная ссылка скопирована');
 }
-
-// ── Course link ──
 function openCourse() {
-  if (tg) tg.openLink('https://elc-kids.kz');
-  else window.open('https://elc-kids.kz', '_blank');
+  const url = 'https://elc-kids.kz';
+  if (tg) tg.openLink(url);
+  else window.open(url, '_blank');
+}
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+function renderAll() {
+  renderUser();
+  renderMissions();
+  renderLeaderboard();
 }
 
-// ── Timer ──
-function updateTimer() {
-  const now = new Date();
-  const sunday = new Date(now);
-  sunday.setDate(now.getDate() + (7 - now.getDay()) % 7 || 7);
-  sunday.setHours(20, 0, 0, 0);
-  const diff = sunday - now;
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  document.getElementById('timer-val').textContent = d + 'д ' + h + 'ч ' + m + 'м';
-}
-updateTimer();
-setInterval(updateTimer, 60000);
+renderAll();
+if (!state.onboarded) setTimeout(openOnboarding, 350);
 </script>
 </body>
 </html>
