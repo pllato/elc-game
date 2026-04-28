@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ELC English Quest</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -263,9 +262,11 @@
   }
   .auth-card p { color: var(--muted); font-size: 13px; line-height: 1.55; margin-bottom: 12px; }
   .auth-actions { display: grid; gap: 8px; margin: 14px 0; }
-  .telegram-login-box {
-    display: flex; justify-content: center; min-height: 44px; align-items: center;
-    background: #F8FAFF; border: 1px solid var(--border); border-radius: 8px; padding: 10px;
+  .form-field { display: grid; gap: 6px; margin-top: 11px; }
+  .form-field label { color: var(--text); font-weight: 800; font-size: 12px; }
+  .form-field input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; color: var(--text); background: #fff; font-size: 14px;
   }
   .app-shell.hidden { display: none; }
 </style>
@@ -300,16 +301,20 @@
 
 <section class="auth-gate" id="auth-gate">
   <div class="auth-card">
-    <h1>Войди через Telegram</h1>
-    <p>Так мы подтянем имя, username и фото профиля для рейтинга ELC Quest. Если открыть игру прямо внутри Telegram, вход произойдёт автоматически.</p>
+    <h1>Вход в ELC Quest</h1>
+    <p>Укажи имя и телефон, чтобы сохранить прогресс, участвовать в рейтинге и получать сообщения по игре. Фото можно добавить позже в профиле.</p>
+    <div class="form-field">
+      <label for="signup-name">Имя</label>
+      <input id="signup-name" autocomplete="name" placeholder="Например, Алина">
+    </div>
+    <div class="form-field">
+      <label for="signup-phone">Телефон</label>
+      <input id="signup-phone" autocomplete="tel" inputmode="tel" placeholder="+7 777 123 45 67">
+    </div>
     <div class="auth-actions">
-      <button class="primary" onclick="openTelegramApp()">Открыть игру в Telegram</button>
-      <button class="secondary" onclick="showLoginWidget()">Войти на сайте</button>
+      <button class="primary" onclick="registerPlayer()">Начать игру</button>
     </div>
-    <div class="telegram-login-box" id="telegram-login-box">
-      <span style="color:var(--muted);font-size:12px">Нажми “Войти на сайте”, чтобы показать кнопку Telegram Login</span>
-    </div>
-    <div class="notice" style="margin-top:12px;margin-bottom:0"><strong>Телефон отдельно:</strong> Telegram не отдаёт номер сайту автоматически. Номер можно получить только в боте, если игрок сам нажмёт “Поделиться контактом”.</div>
+    <div class="notice" style="margin-top:12px;margin-bottom:0"><strong>Реферальная ссылка:</strong> если ты пришёл по приглашению, мы автоматически привяжем тебя к игроку, который отправил ссылку.</div>
   </div>
 </section>
 
@@ -352,14 +357,19 @@
 
     <div class="ref-card">
       <h3>Пригласи друга и получи +50 XP</h3>
-      <p>Кнопка “В Telegram” открывает стандартное окно отправки. Игрок выбирает любой чат или контакт из Telegram, и туда уходит приглашение с твоей ссылкой.</p>
+      <p>Отправь SMS с личной ссылкой. Друг откроет сайт, введёт имя и телефон, а приглашение привяжется к твоему профилю.</p>
       <div class="ref-grid">
-        <button class="share-btn" onclick="shareReferral()">В Telegram</button>
+        <button class="share-btn" onclick="shareReferral()">По SMS</button>
         <button class="copy-btn" onclick="copyReferral()">Скопировать</button>
       </div>
     </div>
 
-    <div class="notice"><strong>Фото профиля.</strong> Если Telegram передаст аватар в Web App, мы покажем его сразу. Для стабильной загрузки фото всех игроков бот должен дополнительно получать аватар через Telegram Bot API.</div>
+    <div class="notice"><strong>Фото профиля.</strong> Можно добавить сейчас как локальное превью. Для общей базы фото позже подключим Uploadcare или другой storage.</div>
+    <div class="upload-card">
+      <button class="upload-btn" onclick="document.getElementById('profile-photo-input').click()">Добавить фото профиля</button>
+      <input class="upload-file" type="file" id="profile-photo-input" accept="image/*" onchange="updateProfilePhoto(this)">
+      <div class="upload-name" id="profile-photo-name">Фото пока не выбрано</div>
+    </div>
 
     <div class="course-card" onclick="openCourse()">
       <div class="course-mark">ELC</div>
@@ -411,7 +421,7 @@
       <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
       <div class="upload-name" id="upload-name">Файл пока не выбран</div>
     </div>
-    <div class="notice"><strong>Куда придёт файл:</strong> сейчас Web App передаёт заявку боту @ELCEnglishQuestBot. Следующий шаг — бот попросит отправить фото/видео в чат и перешлёт его админу ELC на проверку.</div>
+    <div class="notice"><strong>Куда придёт файл:</strong> сайт подготовит заявку для Make.com и Google Sheets. Если webhook ещё не подключён, заявка сохранится на этом устройстве как MVP-демо.</div>
     <div class="sheet-actions">
       <button class="secondary" onclick="closeSubmit()">Отмена</button>
       <button class="primary" onclick="submitMission()">Отправить</button>
@@ -422,11 +432,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const tg = window.Telegram?.WebApp;
-const BOT_USERNAME = 'ELCEnglishQuestBot';
 const APP_URL = 'https://pllato.github.io/elc-game/';
-const STORAGE_KEY = 'elc_quest_state_v3';
-const AUTH_KEY = 'elc_quest_auth_user_v1';
+const MAKE_WEBHOOK_URL = '';
+const STORAGE_KEY = 'elc_quest_site_state_v2';
+const PLAYER_KEY = 'elc_quest_site_player_v2';
 
 const missions = [
   { id: '01', title: 'Coffee order challenge', place: 'Любая кофейня Алматы', xp: 20, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Закажи напиток полностью на английском. Доказательство: короткое видео 15-30 секунд или фото чека с голосовым комментарием.' },
@@ -442,72 +451,65 @@ const missions = [
 ];
 
 const demoLeaders = [
-  { name: '@bekzat_alm', sub: 'Speaker · 12 заданий', xp: 340 },
-  { name: '@dana_speaks', sub: 'Speaker · 10 заданий', xp: 290 },
-  { name: '@nurlan_eng', sub: 'Explorer · 9 заданий', xp: 250 }
+  { name: 'Бекзат', sub: 'Speaker · 12 заданий', xp: 340 },
+  { name: 'Дана', sub: 'Speaker · 10 заданий', xp: 290 },
+  { name: 'Нурлан', sub: 'Explorer · 9 заданий', xp: 250 }
 ];
 
 let state = loadState();
+let player = loadPlayer();
 let activeMission = null;
-let user = {
-  id: 'demo',
-  first_name: 'Гость',
-  last_name: '',
-  username: '',
-  photo_url: ''
-};
 
-if (tg) {
-  tg.ready();
-  tg.expand();
-  const tgUser = tg.initDataUnsafe?.user;
-  if (tgUser) {
-    user = { ...user, ...tgUser };
-    localStorage.setItem(AUTH_KEY, JSON.stringify(user));
-  }
-} else {
-  const savedUser = loadAuthUser();
-  if (savedUser) user = { ...user, ...savedUser };
-}
-
-function loadAuthUser() {
+function loadState() {
   try {
-    return JSON.parse(localStorage.getItem(AUTH_KEY));
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { xp: 0, statuses: {}, referrals: 0, onboarded: false, submissions: [] };
+  } catch {
+    return { xp: 0, statuses: {}, referrals: 0, onboarded: false, submissions: [] };
+  }
+}
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadPlayer() {
+  try {
+    return JSON.parse(localStorage.getItem(PLAYER_KEY));
   } catch {
     return null;
   }
 }
-
-function isAuthorized() {
-  return Boolean(tg?.initDataUnsafe?.user || loadAuthUser());
+function savePlayer() { localStorage.setItem(PLAYER_KEY, JSON.stringify(player)); }
+function incomingRef() { return new URLSearchParams(window.location.search).get('ref') || ''; }
+function createRefCode(name, phone) {
+  const raw = `${name}-${phone}-${Date.now()}`.toLowerCase().replace(/[^a-zа-я0-9]+/gi, '').slice(0, 10);
+  return raw || Math.random().toString(36).slice(2, 10);
 }
+function isAuthorized() { return Boolean(player?.name && player?.phone); }
 
-window.onTelegramAuth = function onTelegramAuth(authUser) {
-  user = { ...user, ...authUser };
-  localStorage.setItem(AUTH_KEY, JSON.stringify(user));
+function registerPlayer() {
+  const name = document.getElementById('signup-name').value.trim();
+  const phone = document.getElementById('signup-phone').value.trim();
+  if (name.length < 2) {
+    showToast('Введи имя');
+    return;
+  }
+  if (phone.replace(/\D/g, '').length < 10) {
+    showToast('Введи телефон');
+    return;
+  }
+  const existing = loadPlayer();
+  player = {
+    id: existing?.id || `p_${Date.now()}`,
+    name,
+    phone,
+    city: 'Алматы',
+    refCode: existing?.refCode || createRefCode(name, phone),
+    referredBy: existing?.referredBy || incomingRef(),
+    photoUrl: existing?.photoUrl || '',
+    createdAt: existing?.createdAt || new Date().toISOString()
+  };
+  savePlayer();
+  postToMake({ action: 'player_registered', player });
   renderAll();
-  updateAuthGate();
-  showToast('Вход выполнен через Telegram');
-};
-
-function showLoginWidget() {
-  const box = document.getElementById('telegram-login-box');
-  box.innerHTML = '';
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = 'https://telegram.org/js/telegram-widget.js?22';
-  script.setAttribute('data-telegram-login', BOT_USERNAME);
-  script.setAttribute('data-size', 'large');
-  script.setAttribute('data-radius', '8');
-  script.setAttribute('data-request-access', 'write');
-  script.setAttribute('data-onauth', 'onTelegramAuth(user)');
-  box.appendChild(script);
-}
-
-function openTelegramApp() {
-  const url = `https://t.me/${BOT_USERNAME}?startapp=quest`;
-  if (tg) tg.openTelegramLink(url);
-  else window.location.href = url;
+  showToast('Профиль создан');
+  if (!state.onboarded) setTimeout(openOnboarding, 250);
 }
 
 function updateAuthGate() {
@@ -517,21 +519,9 @@ function updateAuthGate() {
   document.getElementById('bottom-nav').classList.toggle('hidden', locked);
 }
 
-function loadState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { xp: 0, statuses: {}, referrals: 0, onboarded: false };
-  } catch {
-    return { xp: 0, statuses: {}, referrals: 0, onboarded: false };
-  }
-}
-function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-
 function initials(name) {
   const parts = String(name || 'ELC').trim().split(/\s+/).slice(0, 2);
   return parts.map(p => p[0]).join('').toUpperCase() || 'EL';
-}
-function fullName() {
-  return [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Гость ELC';
 }
 function levelByXP(xp) {
   if (xp >= 500) return { name: 'Champion', next: 700 };
@@ -540,18 +530,17 @@ function levelByXP(xp) {
   return { name: 'Rookie', next: 120 };
 }
 function setAvatar(el, fallback) {
-  if (user.photo_url) el.innerHTML = `<img src="${user.photo_url}" alt="">`;
+  if (player?.photoUrl) el.innerHTML = `<img src="${player.photoUrl}" alt="">`;
   else el.textContent = fallback;
 }
-
 function renderUser() {
-  const name = fullName();
+  const name = player?.name || 'Гость ELC';
   const init = initials(name);
   const level = levelByXP(state.xp);
   document.getElementById('header-name').textContent = name;
   document.getElementById('profile-name').textContent = name;
   document.getElementById('header-level').textContent = `${level.name} · Алматы`;
-  document.getElementById('profile-sub').textContent = `${level.name} · Алматы`;
+  document.getElementById('profile-sub').textContent = `${level.name} · ${player?.phone || 'телефон не указан'}`;
   setAvatar(document.getElementById('header-avatar'), init);
   setAvatar(document.getElementById('profile-avatar'), init);
   document.getElementById('header-xp').textContent = state.xp;
@@ -563,22 +552,20 @@ function renderUser() {
   const pct = Math.max(0, Math.min(100, ((state.xp - prev) / (level.next - prev)) * 100));
   document.getElementById('progress-fill').style.width = `${pct}%`;
   document.getElementById('progress-from').textContent = level.name;
-  document.getElementById('progress-to').textContent = `${state.xp} / ${level.next} -> ${level.name === 'Champion' ? 'ELC Legend' : nextLevelName(level.name)}`;
+  document.getElementById('progress-to').textContent = `${state.xp} / ${level.next} -> ${nextLevelName(level.name)}`;
 }
 function nextLevelName(name) {
   return { Rookie: 'Explorer', Explorer: 'Speaker', Speaker: 'Champion', Champion: 'ELC Legend' }[name];
 }
 
 function unlockedIndex() {
-  const statuses = state.statuses;
   let idx = 0;
   for (let i = 0; i < missions.length; i++) {
-    if (statuses[missions[i].id] === 'done' || statuses[missions[i].id] === 'pending') idx = i + 1;
+    if (state.statuses[missions[i].id] === 'done' || state.statuses[missions[i].id] === 'pending') idx = i + 1;
     else break;
   }
   return Math.min(idx, missions.length - 1);
 }
-
 function renderMissions() {
   const list = document.getElementById('missions-list');
   const openUntil = unlockedIndex();
@@ -604,15 +591,14 @@ function renderMissions() {
       </article>`;
   }).join('');
 }
-
 function renderLeaderboard() {
   const list = document.getElementById('leaderboard');
-  const me = { name: user.username ? `Ты · @${user.username}` : `Ты · ${fullName()}`, sub: `${levelByXP(state.xp).name} · ${Object.keys(state.statuses).length} заданий`, xp: state.xp, me: true };
+  const me = { name: `Ты · ${player?.name || 'Гость'}`, sub: `${levelByXP(state.xp).name} · ${Object.keys(state.statuses).length} заданий`, xp: state.xp, me: true };
   const leaders = [...demoLeaders, me].sort((a, b) => b.xp - a.xp);
   list.innerHTML = leaders.map((p, i) => `
     <div class="leader-item ${p.me ? 'me' : ''}">
       <div class="rank">${i + 1}</div>
-      <div class="leader-avatar">${p.me && user.photo_url ? `<img src="${user.photo_url}" alt="">` : initials(p.name.replace('Ты · ', ''))}</div>
+      <div class="leader-avatar">${p.me && player?.photoUrl ? `<img src="${player.photoUrl}" alt="">` : initials(p.name.replace('Ты · ', ''))}</div>
       <div class="leader-copy"><div class="leader-name">${p.name}</div><div class="leader-sub">${p.sub}</div></div>
       <div class="leader-xp">${p.xp} XP</div>
     </div>
@@ -654,53 +640,85 @@ function openSubmit(event, id) {
 function closeSubmit() { document.getElementById('submit').classList.remove('open'); }
 function updateFileName() {
   const input = document.getElementById('submit-file');
-  const label = document.getElementById('upload-name');
-  label.textContent = input.files.length ? input.files[0].name : 'Файл пока не выбран';
+  document.getElementById('upload-name').textContent = input.files.length ? input.files[0].name : 'Файл пока не выбран';
+}
+function updateProfilePhoto(input) {
+  if (!input.files.length) return;
+  const file = input.files[0];
+  const reader = new FileReader();
+  reader.onload = () => {
+    player.photoUrl = reader.result;
+    savePlayer();
+    document.getElementById('profile-photo-name').textContent = file.name;
+    renderAll();
+    showToast('Фото добавлено в профиль на этом устройстве');
+  };
+  reader.readAsDataURL(file);
 }
 
 function submitMission() {
-  if (!activeMission) return;
+  if (!activeMission || !isAuthorized()) return;
+  const fileInput = document.getElementById('submit-file');
   const note = document.getElementById('submit-note').value.trim();
-  const hasFile = document.getElementById('submit-file').files.length > 0;
-  state.statuses[activeMission.id] = 'pending';
-  saveState();
-  const payload = {
+  const file = fileInput.files[0];
+  const submission = {
+    id: `s_${Date.now()}`,
     action: 'mission_submit',
-    mission_id: activeMission.id,
-    mission_title: activeMission.title,
-    check: activeMission.check,
+    playerId: player.id,
+    playerName: player.name,
+    phone: player.phone,
+    referredBy: player.referredBy || '',
+    missionId: activeMission.id,
+    missionTitle: activeMission.title,
+    xp: activeMission.xp,
     note,
-    has_file: hasFile,
-    user_id: user.id,
-    username: user.username || ''
+    fileName: file?.name || '',
+    fileType: file?.type || '',
+    status: 'pending',
+    createdAt: new Date().toISOString()
   };
-  if (tg) {
-    tg.sendData(JSON.stringify(payload));
-    tg.openTelegramLink(`https://t.me/${BOT_USERNAME}`);
-  }
+  state.statuses[activeMission.id] = 'pending';
+  state.submissions = [...(state.submissions || []), submission];
+  saveState();
+  postToMake(submission, file);
   closeSubmit();
   renderAll();
-  showToast('Заявка создана. Отправь файл в бот для проверки');
+  showToast(MAKE_WEBHOOK_URL ? 'Заявка отправлена на проверку' : 'Заявка сохранена. Подключим Make webhook для базы');
 }
 
 function referralLink() {
-  const ref = user.username || user.id || 'demo';
-  return `https://t.me/${BOT_USERNAME}?start=ref_${encodeURIComponent(ref)}`;
+  return `${APP_URL}?ref=${encodeURIComponent(player?.refCode || 'guest')}`;
 }
 function shareReferral() {
-  const text = 'Присоединяйся к ELC English Quest: городская игра по английскому в Алматы.';
-  const url = `https://t.me/share/url?url=${encodeURIComponent(referralLink())}&text=${encodeURIComponent(text)}`;
-  if (tg) tg.openTelegramLink(url);
-  else window.open(url, '_blank');
+  const text = `Привет! Я играю в ELC English Quest. Заходи: ${referralLink()}`;
+  const smsUrl = `sms:?&body=${encodeURIComponent(text)}`;
+  window.location.href = smsUrl;
 }
 function copyReferral() {
   navigator.clipboard?.writeText(referralLink());
   showToast('Реферальная ссылка скопирована');
 }
 function openCourse() {
-  const url = 'https://elc-kids.kz';
-  if (tg) tg.openLink(url);
-  else window.open(url, '_blank');
+  window.open('https://elc-kids.kz', '_blank');
+}
+async function postToMake(payload, file) {
+  if (!MAKE_WEBHOOK_URL) return;
+  try {
+    if (file) {
+      const formData = new FormData();
+      formData.append('payload', JSON.stringify(payload));
+      formData.append('file', file);
+      await fetch(MAKE_WEBHOOK_URL, { method: 'POST', body: formData });
+      return;
+    }
+    await fetch(MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (error) {
+    console.warn('Make webhook failed', error);
+  }
 }
 function showToast(message) {
   const toast = document.getElementById('toast');
