@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>ELC English Quest</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -364,7 +367,7 @@
       </div>
     </div>
 
-    <div class="notice"><strong>Фото профиля.</strong> Можно добавить сейчас как локальное превью. Для общей базы фото позже подключим Uploadcare или другой storage.</div>
+    <div class="notice"><strong>Фото профиля.</strong> Фото загружается в Cloudinary, а ссылка сохраняется в Firebase.</div>
     <div class="upload-card">
       <button class="upload-btn" onclick="document.getElementById('profile-photo-input').click()">Добавить фото профиля</button>
       <input class="upload-file" type="file" id="profile-photo-input" accept="image/*" onchange="updateProfilePhoto(this)">
@@ -421,7 +424,7 @@
       <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
       <div class="upload-name" id="upload-name">Файл пока не выбран</div>
     </div>
-    <div class="notice"><strong>Куда придёт файл:</strong> сайт подготовит заявку для Make.com и Google Sheets. Если webhook ещё не подключён, заявка сохранится на этом устройстве как MVP-демо.</div>
+    <div class="notice"><strong>Куда придёт файл:</strong> фото или видео загрузится в Cloudinary, а ссылка на файл сохранится в Firebase вместе с заявкой.</div>
     <div class="sheet-actions">
       <button class="secondary" onclick="closeSubmit()">Отмена</button>
       <button class="primary" onclick="submitMission()">Отправить</button>
@@ -433,9 +436,20 @@
 
 <script>
 const APP_URL = 'https://pllato.github.io/elc-game/';
-const MAKE_WEBHOOK_URL = 'https://hook.eu1.make.com/hv9fxfx2exepuyo8e7iovcvch57gfm52';
-const STORAGE_KEY = 'elc_quest_site_state_v2';
-const PLAYER_KEY = 'elc_quest_site_player_v2';
+const MAKE_WEBHOOK_URL = '';
+const CLOUDINARY_CLOUD_NAME = 'dbqp7ibfy';
+const CLOUDINARY_UPLOAD_PRESET = 'elc_quest_unsigned';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCrxjKU1rO1wrrfZ_UJ-TR1l2uDhsSzh1w',
+  authDomain: 'elc-english-quest.firebaseapp.com',
+  projectId: 'elc-english-quest',
+  messagingSenderId: '405162192751',
+  appId: '1:405162192751:web:c4c54883d2c2852988829a'
+};
+const STORAGE_KEY = 'elc_quest_site_state_v3';
+const PLAYER_KEY = 'elc_quest_site_player_v3';
+let firebaseReady = false;
+let firebaseServices = null;
 
 const missions = [
   { id: '01', title: 'Coffee order challenge', place: 'Любая кофейня Алматы', xp: 20, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Закажи напиток полностью на английском. Доказательство: короткое видео 15-30 секунд или фото чека с голосовым комментарием.' },
@@ -482,8 +496,29 @@ function createRefCode(name, phone) {
   return raw || Math.random().toString(36).slice(2, 10);
 }
 function isAuthorized() { return Boolean(player?.name && player?.phone); }
+function hasFirebaseConfig() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('PASTE_');
+}
+async function ensureFirebase() {
+  if (!hasFirebaseConfig() || !window.firebase) return null;
+  if (!firebaseReady) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    firebaseReady = true;
+  }
+  const auth = firebase.auth();
+  if (!auth.currentUser) await auth.signInAnonymously();
+  firebaseServices = {
+    auth,
+    db: firebase.firestore()
+  };
+  return firebaseServices;
+}
+function hasCloudinaryConfig() {
+  return CLOUDINARY_CLOUD_NAME && !CLOUDINARY_CLOUD_NAME.startsWith('PASTE_')
+    && CLOUDINARY_UPLOAD_PRESET && !CLOUDINARY_UPLOAD_PRESET.startsWith('PASTE_');
+}
 
-function registerPlayer() {
+async function registerPlayer() {
   const name = document.getElementById('signup-name').value.trim();
   const phone = document.getElementById('signup-phone').value.trim();
   if (name.length < 2) {
@@ -506,10 +541,30 @@ function registerPlayer() {
     createdAt: existing?.createdAt || new Date().toISOString()
   };
   savePlayer();
-  postToMake({ action: 'player_registered', player });
+  await savePlayerToFirebase();
   renderAll();
   showToast('Профиль создан');
   if (!state.onboarded) setTimeout(openOnboarding, 250);
+}
+
+async function savePlayerToFirebase() {
+  const services = await ensureFirebase();
+  if (!services || !player) return;
+  const uid = services.auth.currentUser.uid;
+  if (player.id !== uid) {
+    player.id = uid;
+    savePlayer();
+  }
+  await services.db.collection('players').doc(uid).set({
+    name: player.name,
+    phone: player.phone,
+    city: player.city || 'Алматы',
+    refCode: player.refCode,
+    referredBy: player.referredBy || '',
+    photoUrl: player.photoUrl || '',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    createdAt: player.createdAt || new Date().toISOString()
+  }, { merge: true });
 }
 
 function updateAuthGate() {
@@ -642,13 +697,27 @@ function updateFileName() {
   const input = document.getElementById('submit-file');
   document.getElementById('upload-name').textContent = input.files.length ? input.files[0].name : 'Файл пока не выбран';
 }
-function updateProfilePhoto(input) {
+async function updateProfilePhoto(input) {
   if (!input.files.length) return;
   const file = input.files[0];
+  document.getElementById('profile-photo-name').textContent = 'Загружаем фото...';
+  if (hasCloudinaryConfig()) {
+    const upload = await uploadToCloudinary(file, `profile_${Date.now()}`);
+    if (upload.status === 'uploaded') {
+      player.photoUrl = upload.url;
+      savePlayer();
+      await savePlayerToFirebase();
+      document.getElementById('profile-photo-name').textContent = file.name;
+      renderAll();
+      showToast('Фото профиля сохранено');
+      return;
+    }
+  }
   const reader = new FileReader();
   reader.onload = () => {
     player.photoUrl = reader.result;
     savePlayer();
+    savePlayerToFirebase();
     document.getElementById('profile-photo-name').textContent = file.name;
     renderAll();
     showToast('Фото добавлено в профиль на этом устройстве');
@@ -656,7 +725,7 @@ function updateProfilePhoto(input) {
   reader.readAsDataURL(file);
 }
 
-function submitMission() {
+async function submitMission() {
   if (!activeMission || !isAuthorized()) return;
   const fileInput = document.getElementById('submit-file');
   const note = document.getElementById('submit-note').value.trim();
@@ -680,10 +749,64 @@ function submitMission() {
   state.statuses[activeMission.id] = 'pending';
   state.submissions = [...(state.submissions || []), submission];
   saveState();
-  postToMake(submission, file);
+  if (file) showToast('Загружаем файл...');
+  await saveSubmissionToFirebase(submission, file);
   closeSubmit();
   renderAll();
-  showToast(MAKE_WEBHOOK_URL ? 'Заявка отправлена на проверку' : 'Заявка сохранена. Подключим Make webhook для базы');
+  showToast(hasFirebaseConfig() ? 'Заявка отправлена на проверку' : 'Заявка сохранена на устройстве');
+}
+
+async function saveSubmissionToFirebase(submission, file) {
+  const services = await ensureFirebase();
+  if (!services) {
+    await postToMake(submission, file);
+    return;
+  }
+  await savePlayerToFirebase();
+  let fileUrl = '';
+  let filePublicId = '';
+  let fileUploadStatus = file ? 'cloudinary_not_configured' : 'no_file';
+  if (file) {
+    const upload = await uploadToCloudinary(file, submission.id);
+    fileUrl = upload.url;
+    filePublicId = upload.publicId;
+    fileUploadStatus = upload.status;
+  }
+  await services.db.collection('submissions').doc(submission.id).set({
+    ...submission,
+    playerId: player.id,
+    fileUrl,
+    filePublicId,
+    fileUploadStatus,
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+async function uploadToCloudinary(file, submissionId) {
+  if (!hasCloudinaryConfig()) {
+    return { url: '', publicId: '', status: 'cloudinary_not_configured' };
+  }
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', `elc-quest/${player.id}/${submissionId}`);
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
+    return {
+      url: data.secure_url || data.url || '',
+      publicId: data.public_id || '',
+      status: 'uploaded'
+    };
+  } catch (error) {
+    console.warn('Cloudinary upload failed', error);
+    return { url: '', publicId: '', status: 'cloudinary_failed' };
+  }
 }
 
 function referralLink() {
@@ -734,7 +857,10 @@ function renderAll() {
 }
 
 renderAll();
-if (isAuthorized() && !state.onboarded) setTimeout(openOnboarding, 350);
+if (isAuthorized()) {
+  savePlayerToFirebase();
+  if (!state.onboarded) setTimeout(openOnboarding, 350);
+}
 </script>
 </body>
 </html>
