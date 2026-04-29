@@ -43,6 +43,11 @@
   .login-card { max-width: 520px; margin: 48px auto; padding: 22px; }
   .login-card h2, .panel h2 { font-size: 18px; margin-bottom: 8px; }
   .login-card p, .empty, .small { color: var(--muted); font-size: 13px; line-height: 1.55; }
+  .login-grid { display: grid; gap: 10px; margin-top: 14px; }
+  .login-grid input {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; color: var(--text); background: #fff;
+  }
   .primary { background: var(--red); color: #fff; padding: 12px 14px; }
   .secondary { background: #E9EEFF; color: var(--blue); padding: 10px 12px; }
   .success { background: var(--green); color: #fff; padding: 10px 12px; }
@@ -98,7 +103,7 @@
     </div>
     <div class="userbox" id="userbox">
       <strong>Не авторизован</strong>
-      <span>Войдите через Google</span>
+      <span>Войдите как админ</span>
     </div>
   </div>
 </header>
@@ -106,12 +111,17 @@
 <main>
   <section class="login-card" id="login-card">
     <h2>Вход администратора</h2>
-    <p>Админка читает заявки из Firebase и меняет статус выполнения. Доступ должен быть разрешён в Firestore rules для вашего Google email.</p>
+    <p>Админка читает заявки из Firebase и меняет статус выполнения. Доступ открыт только для <strong>uurraa@gmail.com</strong>.</p>
+    <div class="login-grid">
+      <input id="admin-email" type="email" autocomplete="email" value="uurraa@gmail.com" placeholder="Email администратора">
+      <input id="admin-password" type="password" autocomplete="current-password" placeholder="Пароль">
+    </div>
     <div class="login-actions">
-      <button class="primary" onclick="signIn()">Войти через Google</button>
+      <button class="primary" onclick="signIn()">Войти</button>
+      <button class="secondary" onclick="createAdminUser()">Создать пароль</button>
       <a class="ghost" href="./index.html">Открыть игру</a>
     </div>
-    <p class="small" style="margin-top:14px">Если после входа будет ошибка доступа, нужно добавить ваш email в правила Firebase.</p>
+    <p class="small" style="margin-top:14px">Если админ ещё не создан, введите пароль минимум 6 символов и нажмите «Создать пароль». Потом входите этой же парой email + пароль.</p>
   </section>
 
   <section class="hidden" id="admin-app">
@@ -155,21 +165,53 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const ADMIN_EMAIL = 'uurraa@gmail.com';
 let submissions = [];
 let players = new Map();
 
-function signIn() {
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+function authFields() {
+  return {
+    email: document.getElementById('admin-email').value.trim(),
+    password: document.getElementById('admin-password').value
+  };
+}
+
+async function signIn() {
+  const { email, password } = authFields();
+  if (!email || !password) {
+    showToast('Введите email и пароль');
+    return;
+  }
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    console.error(error);
+    showToast(authErrorMessage(error));
+  }
+}
+
+async function createAdminUser() {
+  const { email, password } = authFields();
+  if (email.toLowerCase() !== ADMIN_EMAIL) {
+    showToast('Этот email не указан как админ');
+    return;
+  }
+  if (password.length < 6) {
+    showToast('Пароль минимум 6 символов');
+    return;
+  }
+  try {
+    await auth.createUserWithEmailAndPassword(email, password);
+    showToast('Админ создан');
+  } catch (error) {
+    console.error(error);
+    showToast(authErrorMessage(error));
+  }
 }
 
 function signOut() {
   auth.signOut();
 }
-
-auth.getRedirectResult().catch(error => {
-  console.error(error);
-  showToast(authErrorMessage(error));
-});
 
 auth.onAuthStateChanged(async user => {
   const login = document.getElementById('login-card');
@@ -178,7 +220,7 @@ auth.onAuthStateChanged(async user => {
   if (!user) {
     login.classList.remove('hidden');
     app.classList.add('hidden');
-    userbox.innerHTML = '<strong>Не авторизован</strong><span>Войдите через Google</span>';
+    userbox.innerHTML = '<strong>Не авторизован</strong><span>Войдите как админ</span>';
     return;
   }
   userbox.innerHTML = `<strong>${escapeHtml(user.displayName || user.email || 'Админ')}</strong><span>${escapeHtml(user.email || '')} · <button class="ghost" onclick="signOut()">Выйти</button></span>`;
@@ -198,7 +240,7 @@ async function loadSubmissions() {
   } catch (error) {
     console.error(error);
     showToast('Нет доступа. Проверьте Firestore rules');
-    document.getElementById('submissions').innerHTML = `<div class="empty">Нет доступа к заявкам. Нужно разрешить ваш Google email в Firestore rules.</div>`;
+    document.getElementById('submissions').innerHTML = `<div class="empty">Нет доступа к заявкам. Войдите под email ${ADMIN_EMAIL} или проверьте Firestore rules.</div>`;
   }
 }
 
@@ -327,10 +369,12 @@ function showToast(message) {
 }
 
 function authErrorMessage(error) {
-  if (error?.code === 'auth/operation-not-allowed') return 'Google вход не включён в Firebase Authentication';
-  if (error?.code === 'auth/unauthorized-domain') return 'Домен pllato.github.io не разрешён в Firebase Authentication';
-  if (error?.code === 'auth/popup-blocked') return 'Браузер заблокировал окно входа';
-  return 'Не получилось войти через Google';
+  if (error?.code === 'auth/operation-not-allowed') return 'Email/password вход не включён в Firebase';
+  if (error?.code === 'auth/email-already-in-use') return 'Админ уже создан, нажмите «Войти»';
+  if (error?.code === 'auth/user-not-found') return 'Админ ещё не создан';
+  if (error?.code === 'auth/wrong-password' || error?.code === 'auth/invalid-credential') return 'Неверный email или пароль';
+  if (error?.code === 'auth/weak-password') return 'Пароль минимум 6 символов';
+  return 'Не получилось войти';
 }
 </script>
 </body>
