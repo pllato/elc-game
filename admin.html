@@ -256,12 +256,32 @@ async function setStatus(id, status) {
   try {
     if (status === 'approved') await approvePlayerXP(submission);
     await db.collection('submissions').doc(id).update(payload);
+    if (status === 'approved') await publishStory(submission);
     showToast(status === 'approved' ? 'Заявка зачтена' : 'Заявка отклонена');
     await loadSubmissions();
   } catch (error) {
     console.error(error);
     showToast('Не получилось сохранить решение');
   }
+}
+
+async function publishStory(submission) {
+  if (!submission.fileUrl) return;
+  await db.collection('stories').doc(submission.id).set({
+    submissionId: submission.id,
+    playerId: submission.playerId || '',
+    playerName: submission.playerName || 'Участник',
+    missionId: submission.missionId || '',
+    missionTitle: submission.missionTitle || 'Задание',
+    missionDesc: submission.missionDesc || submission.note || '',
+    note: submission.note || '',
+    xp: Number(submission.xp || 0),
+    fileUrl: submission.fileUrl || '',
+    fileType: submission.fileType || '',
+    filePublicId: submission.filePublicId || '',
+    likes: 0,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
 }
 
 async function approvePlayerXP(submission) {
@@ -302,6 +322,7 @@ async function recalculateXP() {
       }, { merge: true });
     });
     await batch.commit();
+    await Promise.all(approved.map(item => publishStory(item)));
     showToast('XP пересчитан');
     await loadSubmissions();
   } catch (error) {

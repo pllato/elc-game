@@ -107,6 +107,65 @@
     margin: 14px 2px 9px; color: var(--muted); text-transform: uppercase;
     font-size: 11px; font-weight: 800; letter-spacing: .06em;
   }
+  .stories-rail {
+    display: flex; gap: 10px; overflow-x: auto; padding: 2px 1px 12px;
+    scrollbar-width: none;
+  }
+  .stories-rail::-webkit-scrollbar { display: none; }
+  .story-bubble {
+    width: 76px; flex: 0 0 auto; border: 0; background: transparent; color: var(--text);
+    display: grid; gap: 6px; justify-items: center;
+  }
+  .story-ring {
+    width: 64px; height: 64px; border-radius: 50%; padding: 3px;
+    background: linear-gradient(145deg, var(--red), var(--blue));
+  }
+  .story-avatar {
+    width: 100%; height: 100%; border-radius: 50%; background: #fff; overflow: hidden;
+    display: grid; place-items: center; color: var(--blue); font-weight: 900;
+    border: 2px solid #fff;
+  }
+  .story-avatar img, .story-avatar video { width: 100%; height: 100%; object-fit: cover; }
+  .story-label { width: 76px; font-size: 10px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .quick-create {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px; margin-bottom: 12px; display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center;
+  }
+  .quick-create strong { display: block; font-size: 14px; }
+  .quick-create span { display: block; margin-top: 3px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+  .mini-btn {
+    border: 0; border-radius: 999px; padding: 10px 12px; background: var(--blue);
+    color: #fff; font-size: 12px; font-weight: 900; white-space: nowrap;
+  }
+  .daily-path {
+    position: relative; display: grid; gap: 12px; padding: 2px 0 8px;
+  }
+  .daily-path::before {
+    content: ""; position: absolute; left: 34px; top: 34px; bottom: 34px;
+    width: 4px; border-radius: 99px; background: #DDE5FF;
+  }
+  .path-card {
+    position: relative; display: grid; grid-template-columns: 72px 1fr; gap: 10px;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+  }
+  .path-card.locked { opacity: .55; }
+  .path-node {
+    position: relative; z-index: 1; width: 48px; height: 48px; border-radius: 50%;
+    background: #E9EEFF; color: var(--blue); display: grid; place-items: center;
+    font-family: Unbounded, sans-serif; font-weight: 800; border: 4px solid #fff;
+    box-shadow: 0 0 0 2px #DDE5FF;
+  }
+  .path-card.done .path-node { background: #D1FAE5; color: #047857; box-shadow: 0 0 0 2px #A7F3D0; }
+  .path-card.active .path-node { background: var(--red); color: #fff; box-shadow: 0 0 0 2px #FCA5A5; }
+  .path-copy h3 { font-size: 15px; line-height: 1.25; margin-bottom: 5px; }
+  .path-copy p { color: var(--muted); font-size: 12px; line-height: 1.45; margin-bottom: 9px; }
+  .path-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .path-meta .tag { padding: 4px 8px; }
+  .path-action {
+    margin-top: 10px; border: 0; border-radius: 8px; padding: 10px 12px;
+    background: var(--blue); color: #fff; font-size: 12px; font-weight: 900;
+  }
+  .path-action:disabled { background: #9AA7CC; }
 
   .mission-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 8px;
@@ -214,7 +273,7 @@
   }
   .overlay.open { display: flex; }
   .sheet {
-    width: 100%; background: #fff; border-radius: 18px 18px 0 0; padding: 18px 16px 26px;
+    width: 100%; max-height: 90vh; overflow-y: auto; background: #fff; border-radius: 18px 18px 0 0; padding: 18px 16px 26px;
     animation: up .24s ease;
   }
   @keyframes up { from { transform: translateY(100%); } to { transform: none; } }
@@ -266,6 +325,43 @@
   }
   .record-dot.live { background: var(--red); animation: pulse 1s infinite; }
   @keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
+  .story-viewer {
+    align-items: stretch; background: #070B18; color: #fff; z-index: 70;
+  }
+  .story-panel {
+    width: 100%; min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto;
+    padding: 14px; gap: 12px;
+  }
+  .story-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .story-user { display: flex; align-items: center; gap: 9px; min-width: 0; }
+  .story-user .story-avatar { width: 38px; height: 38px; border: 0; }
+  .story-user strong { display: block; font-size: 13px; }
+  .story-user span { display: block; color: rgba(255,255,255,.65); font-size: 11px; }
+  .story-close { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; font-weight: 900; }
+  .story-media {
+    position: relative; border-radius: 18px; overflow: hidden; background: #111827;
+    min-height: 420px; display: grid; place-items: center;
+  }
+  .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
+  .story-fallback { color: rgba(255,255,255,.74); font-weight: 800; }
+  .story-task {
+    position: absolute; left: 12px; right: 12px; bottom: 12px;
+    background: rgba(7,11,24,.72); border: 1px solid rgba(255,255,255,.14);
+    border-radius: 8px; padding: 12px; backdrop-filter: blur(12px);
+  }
+  .story-task strong { display: block; font-size: 14px; margin-bottom: 4px; }
+  .story-task span { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
+  .story-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .story-actions button {
+    border: 0; border-radius: 8px; padding: 11px 8px; font-size: 12px; font-weight: 900;
+    background: rgba(255,255,255,.12); color: #fff;
+  }
+  .story-actions .primary { background: var(--red); }
+  .create-fields { display: grid; gap: 10px; margin: 12px 0; }
+  .create-fields input, .create-fields textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
+    color: var(--text); background: #fff; font-size: 14px;
+  }
   .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .toast {
     position: fixed; left: 50%; bottom: 92px; transform: translate(-50%, 12px);
@@ -315,14 +411,14 @@
     <div class="avatar" id="header-avatar">EL</div>
     <div class="player-main">
       <div class="player-name" id="header-name">Гость ELC</div>
-      <div class="player-level" id="header-level">Rookie · Алматы</div>
+      <div class="player-level" id="header-level">Новичок · Алматы</div>
     </div>
     <div class="xp"><strong id="header-xp">0</strong><span>XP</span></div>
   </div>
 
   <div class="progress">
     <div class="track"><div class="fill" id="progress-fill"></div></div>
-    <div class="progress-copy"><span id="progress-from">Rookie</span><span id="progress-to">0 / 120 -> Explorer</span></div>
+    <div class="progress-copy"><span id="progress-from">Новичок</span><span id="progress-to">0 / 120 -> Исследователь</span></div>
   </div>
 </header>
 
@@ -348,15 +444,23 @@
 <main class="app-shell" id="app-shell">
   <section class="screen active" id="screen-missions">
     <div class="hero">
-      <h1>Городская игра по английскому от ELC</h1>
-      <p>Выполняй задания в реальных местах Алматы, говори на английском, отправляй доказательства и поднимайся в рейтинге недели.</p>
+      <h1>Кружки Алматы</h1>
+      <p>Смотри короткие кружки, повторяй задания и записывай свои. Город здесь не как маршрут, а как твоя обычная жизнь: улица, школа, кофе, друзья, район.</p>
       <div class="hero-actions">
-        <button class="primary" onclick="openOnboarding()">Как играть</button>
-        <button class="secondary" onclick="showScreen('profile')">Мой прогресс</button>
+        <button class="primary" onclick="openCreateMission()">Создать задание</button>
+        <button class="secondary" onclick="openOnboarding()">Как играть</button>
       </div>
     </div>
-    <div class="notice"><strong>Задания открываются постепенно.</strong> Выполни активное задание, дождись проверки или статуса ожидания, и следующий уровень появится автоматически.</div>
-    <div class="section-title">Текущая цепочка</div>
+    <div class="section-title">Кружки участников</div>
+    <div class="stories-rail" id="stories-rail"></div>
+    <div class="quick-create">
+      <div>
+        <strong>Есть идея для задания?</strong>
+        <span>Придумай простую тему, которую другие смогут повторить без долгой поездки.</span>
+      </div>
+      <button class="mini-btn" onclick="openCreateMission()">Создать</button>
+    </div>
+    <div class="section-title">Задания дня</div>
     <div id="missions-list"></div>
   </section>
 
@@ -372,7 +476,7 @@
     <div class="profile-head">
       <div class="profile-avatar" id="profile-avatar">EL</div>
       <div class="profile-name" id="profile-name">Гость ELC</div>
-      <div class="profile-sub" id="profile-sub">Rookie · Алматы</div>
+      <div class="profile-sub" id="profile-sub">Новичок · Алматы</div>
     </div>
 
     <div class="stats">
@@ -427,11 +531,11 @@
   <div class="sheet">
     <div class="handle"></div>
     <h2>Как работает ELC Quest</h2>
-    <p>Это городская игра: ты открываешь задание, выполняешь его в Алматы, отправляешь фото, видео или комментарий и получаешь XP после проверки.</p>
+    <p>Это социальная игра коротких English-кружков. Смотри, повторяй, создавай задания и получай XP после проверки администратора.</p>
     <div class="steps">
-      <div class="step"><strong>1. Выбери</strong><span>Открыто первое активное задание.</span></div>
-      <div class="step"><strong>2. Сделай</strong><span>Говори на английском в реальной ситуации.</span></div>
-      <div class="step"><strong>3. Отправь</strong><span>Лёгкие задания можно засчитывать авто, сложные смотрит админ.</span></div>
+      <div class="step"><strong>1. Смотри</strong><span>Открой кружок участника или задание дня.</span></div>
+      <div class="step"><strong>2. Повтори</strong><span>Расскажи о себе, улице, школе, еде или городе.</span></div>
+      <div class="step"><strong>3. Запиши</strong><span>Кружок уйдёт на проверку и появится в ленте после зачёта.</span></div>
     </div>
     <button class="primary" style="width:100%" onclick="finishOnboarding()">Начать игру</button>
   </div>
@@ -441,17 +545,11 @@
   <div class="sheet">
     <div class="handle"></div>
     <h2 id="submit-title">Задание</h2>
-    <p id="submit-copy">Опиши выполнение и приложи файл. В реальной версии файл уйдет боту или в базу хранения.</p>
-    <textarea class="input-area" id="submit-note" placeholder="Коротко опиши, что сделал. Например: заказал капучино на английском в кофейне на Абая."></textarea>
-    <div class="upload-card">
-      <button class="upload-btn" onclick="document.getElementById('submit-file').click()">Выбрать фото или видео</button>
-      <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
-      <div class="upload-name" id="upload-name">Файл пока не выбран</div>
-    </div>
+    <p id="submit-copy">Нажми запись, скажи 20-40 секунд на английском и останови. Видео сразу уйдёт на проверку.</p>
     <div class="record-card">
       <div class="circle-preview" id="circle-preview">Кружок</div>
       <div class="record-copy">
-        <strong>Записать кружок</strong>
+        <strong>Главное действие</strong>
         <span id="record-status">Короткое видео с камеры сразу уйдёт на проверку после остановки.</span>
         <div class="record-row">
           <button class="record-btn" id="record-btn" onclick="toggleCircleRecording()">Начать запись</button>
@@ -459,10 +557,49 @@
         </div>
       </div>
     </div>
-    <div class="notice"><strong>Куда придёт файл:</strong> фото или видео загрузится в Cloudinary, а ссылка на файл сохранится в Firebase вместе с заявкой.</div>
+    <textarea class="input-area" id="submit-note" placeholder="Комментарий необязателен"></textarea>
+    <div class="upload-card">
+      <button class="upload-btn" onclick="document.getElementById('submit-file').click()">Прикрепить готовое видео</button>
+      <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
+      <div class="upload-name" id="upload-name">Файл пока не выбран</div>
+    </div>
     <div class="sheet-actions">
       <button class="secondary" onclick="closeSubmit()">Отмена</button>
       <button class="primary" onclick="submitMission()">Отправить</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay story-viewer" id="story-viewer">
+  <div class="story-panel">
+    <div class="story-head">
+      <div class="story-user">
+        <div class="story-avatar" id="story-user-avatar">EL</div>
+        <div><strong id="story-user-name">Участник</strong><span id="story-user-meta">Задание</span></div>
+      </div>
+      <button class="story-close" onclick="closeStory()">×</button>
+    </div>
+    <div class="story-media" id="story-media" onclick="nextStory()"></div>
+    <div class="story-actions">
+      <button onclick="likeStory()">Нравится</button>
+      <button onclick="followStory()">В друзья</button>
+      <button class="primary" onclick="repeatStoryMission()">Выполнить</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="create-mission" onclick="closeOverlay(event, 'create-mission')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <h2>Создать задание</h2>
+    <p>Задание должно быть простым: выполнить дома, рядом со школой, на улице, в кафе или по дороге.</p>
+    <div class="create-fields">
+      <input id="create-title" maxlength="52" placeholder="Например: Моя улица за 30 секунд">
+      <textarea id="create-desc" maxlength="180" placeholder="Что сказать на английском? Например: назови улицу, что рядом, почему тебе нравится или не нравится."></textarea>
+    </div>
+    <div class="sheet-actions">
+      <button class="secondary" onclick="document.getElementById('create-mission').classList.remove('open')">Отмена</button>
+      <button class="primary" onclick="publishUserMission()">Опубликовать</button>
     </div>
   </div>
 </div>
@@ -486,28 +623,36 @@ const PLAYER_KEY = 'elc_quest_site_player_v3';
 let firebaseReady = false;
 let firebaseServices = null;
 
-const missions = [
-  { id: '01', title: 'Coffee order challenge', place: 'Любая кофейня Алматы', xp: 20, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Закажи напиток полностью на английском. Доказательство: короткое видео 15-30 секунд или фото чека с голосовым комментарием.' },
-  { id: '02', title: 'Metro directions', place: 'Станция метро Байконур', xp: 25, level: 'easy', tags: ['Лёгкое'], check: 'auto', desc: 'Объясни на английском, как добраться от станции до ближайшего ориентира. Доказательство: видео 30 секунд.' },
-  { id: '03', title: 'Ask a stranger', place: 'Арбат', xp: 35, level: 'easy', tags: ['Социальное'], check: 'manual', desc: 'Вежливо задай прохожему один простой вопрос на английском. Важно: сначала спроси разрешение на съёмку.' },
-  { id: '04', title: 'Museum mini guide', place: 'Центральный государственный музей', xp: 45, level: 'med', tags: ['Среднее'], check: 'manual', desc: 'Запиши мини-экскурсию на английском: 3 факта о месте или экспонате.' },
-  { id: '05', title: 'Green Bazaar shopping', place: 'Зелёный базар', xp: 50, level: 'med', tags: ['Среднее'], check: 'manual', desc: 'Сыграй ситуацию покупки на английском: спроси цену, попроси рекомендацию, поблагодари.' },
-  { id: '06', title: 'Kok-Tobe travel vlog', place: 'Коктобе', xp: 60, level: 'med', tags: ['Влог'], check: 'manual', desc: 'Сними 60-секундный travel vlog на английском для гостя Алматы.' },
-  { id: '07', title: 'Esentai speed debate', place: 'Esentai Mall', xp: 70, level: 'med', tags: ['Команда'], check: 'manual', desc: 'Найди игрока или друга и проведите короткие дебаты на английском. Формат: 1 минута за, 1 минута против.' },
-  { id: '08', title: 'Hotel reception roleplay', place: 'Любой отель или лобби-зона', xp: 75, level: 'hard', tags: ['Сложное'], check: 'manual', desc: 'Разыграй ситуацию на ресепшене: бронирование, вопрос о завтраке, просьба о позднем выезде.' },
-  { id: '09', title: 'Central Park speech', place: 'Центральный парк', xp: 90, level: 'hard', tags: ['Сложное'], check: 'manual', desc: 'Произнеси публичную мини-речь на английском: Why Almaty is a great city to live in.' },
-  { id: '10', title: 'Almaty Ambassador', place: 'Аэропорт Алматы', xp: 120, level: 'hard', tags: ['Финал'], check: 'manual', desc: 'Поговори с иностранным гостем минимум 3 минуты и расскажи о городе. Съёмка только с разрешения собеседника.' }
+let missions = [
+  { id: '01', title: 'О себе', place: 'Где угодно', xp: 20, level: 'easy', tags: ['Легко'], check: 'manual', desc: 'Скажи на английском: имя, чем занимаешься, что любишь и одну цель в английском.' },
+  { id: '02', title: 'Моя улица', place: 'Своя улица или двор', xp: 25, level: 'easy', tags: ['Рядом'], check: 'manual', desc: 'Покажи улицу или двор и расскажи 3 простые вещи: где это, что рядом, нравится ли тебе это место.' },
+  { id: '03', title: 'Что я ем сегодня', place: 'Дом, кафе или столовая', xp: 25, level: 'easy', tags: ['Еда'], check: 'manual', desc: 'Покажи еду или напиток и опиши вкус, цену или почему выбрал именно это.' },
+  { id: '04', title: 'Моя школа или работа', place: 'Школа, офис или место учёбы', xp: 30, level: 'easy', tags: ['День'], check: 'manual', desc: 'Расскажи где учишься или работаешь, что обычно делаешь и что там самое сложное.' },
+  { id: '05', title: 'Алматы одним словом', place: 'Любое место Алматы', xp: 35, level: 'med', tags: ['Город'], check: 'manual', desc: 'Выбери одно слово для Алматы и объясни на английском, почему именно оно.' },
+  { id: '06', title: 'Мой маршрут сегодня', place: 'По дороге', xp: 35, level: 'med', tags: ['Маршрут'], check: 'manual', desc: 'Расскажи куда идёшь сегодня и как обычно добираешься: пешком, автобус, метро или машина.' },
+  { id: '07', title: 'Три вещи вокруг', place: 'Комната, улица или кафе', xp: 40, level: 'med', tags: ['Слова'], check: 'manual', desc: 'Покажи три предмета вокруг и назови их на английском с коротким описанием.' },
+  { id: '08', title: 'Моё мнение', place: 'Где угодно', xp: 45, level: 'med', tags: ['Мнение'], check: 'manual', desc: 'Ответь на вопрос: What should every visitor try in Almaty? Объясни свой выбор.' },
+  { id: '09', title: 'Научи одной фразе', place: 'Где угодно', xp: 50, level: 'hard', tags: ['Учитель'], check: 'manual', desc: 'Научи зрителей одной полезной английской фразе и покажи пример ситуации.' },
+  { id: '10', title: 'Мини-история дня', place: 'Где угодно', xp: 60, level: 'hard', tags: ['История'], check: 'manual', desc: 'Расскажи короткую историю дня: что случилось, что почувствовал, что будет дальше.' }
 ];
 
 const demoLeaders = [
-  { name: 'Бекзат', sub: 'Speaker · 12 заданий', xp: 340 },
-  { name: 'Дана', sub: 'Speaker · 10 заданий', xp: 290 },
-  { name: 'Нурлан', sub: 'Explorer · 9 заданий', xp: 250 }
+  { name: 'Бекзат', sub: 'Спикер · 12 заданий', xp: 340 },
+  { name: 'Дана', sub: 'Спикер · 10 заданий', xp: 290 },
+  { name: 'Нурлан', sub: 'Исследователь · 9 заданий', xp: 250 }
+];
+
+const demoStories = [
+  { id: 'demo_1', playerName: 'Дана', missionId: '01', missionTitle: 'О себе', missionDesc: 'Расскажи о себе в 30 секунд.', fileUrl: '', likes: 12 },
+  { id: 'demo_2', playerName: 'Бекзат', missionId: '02', missionTitle: 'Моя улица', missionDesc: 'Покажи свою улицу и скажи 3 факта.', fileUrl: '', likes: 9 },
+  { id: 'demo_3', playerName: 'Алина', missionId: '03', missionTitle: 'Что я ем сегодня', missionDesc: 'Покажи еду и опиши её на английском.', fileUrl: '', likes: 7 }
 ];
 
 let state = loadState();
 let player = loadPlayer();
 let activeMission = null;
+let stories = [...demoStories];
+let activeStoryIndex = 0;
 let circleRecorder = null;
 let circleStream = null;
 let circleChunks = [];
@@ -649,10 +794,10 @@ function initials(name) {
   return parts.map(p => p[0]).join('').toUpperCase() || 'EL';
 }
 function levelByXP(xp) {
-  if (xp >= 500) return { name: 'Champion', next: 700 };
-  if (xp >= 260) return { name: 'Speaker', next: 500 };
-  if (xp >= 120) return { name: 'Explorer', next: 260 };
-  return { name: 'Rookie', next: 120 };
+  if (xp >= 500) return { name: 'Легенда', next: 700 };
+  if (xp >= 260) return { name: 'Спикер', next: 500 };
+  if (xp >= 120) return { name: 'Исследователь', next: 260 };
+  return { name: 'Новичок', next: 120 };
 }
 function setAvatar(el, fallback) {
   if (player?.photoUrl) el.innerHTML = `<img src="${player.photoUrl}" alt="">`;
@@ -673,14 +818,14 @@ function renderUser() {
   document.getElementById('stat-done').textContent = Object.values(state.statuses).filter(s => s === 'done').length;
   document.getElementById('stat-pending').textContent = Object.values(state.statuses).filter(s => s === 'pending').length;
   document.getElementById('stat-ref').textContent = state.referrals || 0;
-  const prev = level.name === 'Rookie' ? 0 : level.name === 'Explorer' ? 120 : level.name === 'Speaker' ? 260 : 500;
+  const prev = level.name === 'Новичок' ? 0 : level.name === 'Исследователь' ? 120 : level.name === 'Спикер' ? 260 : 500;
   const pct = Math.max(0, Math.min(100, ((state.xp - prev) / (level.next - prev)) * 100));
   document.getElementById('progress-fill').style.width = `${pct}%`;
   document.getElementById('progress-from').textContent = level.name;
   document.getElementById('progress-to').textContent = `${state.xp} / ${level.next} -> ${nextLevelName(level.name)}`;
 }
 function nextLevelName(name) {
-  return { Rookie: 'Explorer', Explorer: 'Speaker', Speaker: 'Champion', Champion: 'ELC Legend' }[name];
+  return { 'Новичок': 'Исследователь', 'Исследователь': 'Спикер', 'Спикер': 'Легенда', 'Легенда': 'ELC Pro' }[name];
 }
 
 function unlockedIndex() {
@@ -694,27 +839,191 @@ function unlockedIndex() {
 function renderMissions() {
   const list = document.getElementById('missions-list');
   const openUntil = unlockedIndex();
+  list.className = 'daily-path';
   list.innerHTML = missions.map((m, index) => {
     const status = state.statuses[m.id] || 'new';
     const locked = index > openUntil;
-    const statusTag = locked ? 'Закрыто' : status === 'done' ? 'Зачтено' : status === 'pending' ? 'На проверке' : m.check === 'auto' ? 'Авто' : 'Админ';
+    const cardState = locked ? 'locked' : status === 'done' ? 'done' : status === 'pending' ? 'pending' : 'active';
+    const statusTag = locked ? 'Скоро' : status === 'done' ? 'Зачтено' : status === 'pending' ? 'На проверке' : 'Сегодня';
     const statusClass = locked ? 'locked-tag' : status === 'done' ? 'done' : status === 'pending' ? 'pending' : 'state';
-    const btnText = locked ? 'Откроется после предыдущего задания' : status === 'done' ? 'Задание уже зачтено' : status === 'pending' ? 'Ожидает проверки' : 'Отправить выполнение';
+    const btnText = locked ? 'Откроется позже' : status === 'done' ? 'Готово' : status === 'pending' ? 'Ждёт проверки' : 'Записать кружок';
     return `
-      <article class="mission-card ${locked ? 'locked' : ''}" onclick="toggleMission(event, this)">
-        <div class="mission-top">
-          <div class="tags">
-            <span class="tag ${m.level}">${m.tags[0]}</span>
+      <article class="path-card ${cardState}">
+        <div class="path-node">${status === 'done' ? '✓' : index + 1}</div>
+        <div class="path-copy">
+          <h3>${escapeHtml(m.title)}</h3>
+          <p>${escapeHtml(m.desc)}</p>
+          <div class="path-meta">
+            <span class="tag ${m.level}">${escapeHtml(m.tags[0])}</span>
             <span class="tag ${statusClass}">${statusTag}</span>
+            <span class="xp-badge">+${m.xp} XP</span>
           </div>
-          <span class="xp-badge">+${m.xp} XP</span>
+          <button class="path-action" ${locked || status !== 'new' ? 'disabled' : ''} onclick="openSubmit(event, '${m.id}')">${btnText}</button>
         </div>
-        <div class="mission-title">${String(index + 1).padStart(2, '0')}. ${m.title}</div>
-        <div class="mission-location">${m.place}</div>
-        <div class="mission-desc">${m.desc}</div>
-        <button class="mission-btn" ${locked || status !== 'new' ? 'disabled' : ''} onclick="openSubmit(event, '${m.id}')">${btnText}</button>
       </article>`;
   }).join('');
+}
+
+function renderStories() {
+  const rail = document.getElementById('stories-rail');
+  if (!rail) return;
+  const data = stories.length ? stories : demoStories;
+  rail.innerHTML = data.map((story, index) => `
+    <button class="story-bubble" onclick="openStory(${index})">
+      <span class="story-ring"><span class="story-avatar">${story.fileUrl ? storyMediaThumb(story) : initials(story.playerName)}</span></span>
+      <span class="story-label">${escapeHtml(story.playerName || 'ELC')}</span>
+    </button>
+  `).join('');
+}
+
+function storyMediaThumb(story) {
+  if (String(story.fileType || '').startsWith('image/')) return `<img src="${escapeAttr(story.fileUrl)}" alt="">`;
+  if (story.fileUrl) return `<video src="${escapeAttr(story.fileUrl)}" muted playsinline></video>`;
+  return initials(story.playerName);
+}
+
+function openStory(index) {
+  activeStoryIndex = index;
+  renderStoryViewer();
+  document.getElementById('story-viewer').classList.add('open');
+}
+
+function closeStory() {
+  document.getElementById('story-viewer').classList.remove('open');
+  document.getElementById('story-media').innerHTML = '';
+}
+
+function nextStory() {
+  if (!stories.length) return;
+  activeStoryIndex = (activeStoryIndex + 1) % stories.length;
+  renderStoryViewer();
+}
+
+function renderStoryViewer() {
+  const story = stories[activeStoryIndex] || demoStories[0];
+  document.getElementById('story-user-name').textContent = story.playerName || 'Участник';
+  document.getElementById('story-user-meta').textContent = story.missionTitle || 'Задание';
+  document.getElementById('story-user-avatar').textContent = initials(story.playerName);
+  const media = document.getElementById('story-media');
+  const task = `
+    <div class="story-task">
+      <strong>${escapeHtml(story.missionTitle || 'Задание')}</strong>
+      <span>${escapeHtml(story.missionDesc || story.note || 'Повтори это задание и запиши свой кружок.')}</span>
+    </div>`;
+  if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
+    media.innerHTML = `<img src="${escapeAttr(story.fileUrl)}" alt="">${task}`;
+  } else if (story.fileUrl) {
+    media.innerHTML = `<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>${task}`;
+  } else {
+    media.innerHTML = `<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>${task}`;
+  }
+}
+
+function likeStory() {
+  const story = stories[activeStoryIndex];
+  if (!story) return;
+  const key = `liked_${story.id}`;
+  localStorage.setItem(key, '1');
+  showToast('Лайк поставлен');
+}
+
+function followStory() {
+  const story = stories[activeStoryIndex];
+  if (!story) return;
+  showToast(`${story.playerName || 'Участник'} добавлен в друзья`);
+}
+
+function repeatStoryMission() {
+  const story = stories[activeStoryIndex] || {};
+  const mission = missions.find(item => item.id === story.missionId) || {
+    id: story.missionId || `story_${Date.now()}`,
+    title: story.missionTitle || 'Повтори задание',
+    place: 'Где угодно',
+    xp: Number(story.xp || 25),
+    level: 'easy',
+    tags: ['Повтор'],
+    check: 'manual',
+    desc: story.missionDesc || story.note || 'Запиши свой вариант этого задания.'
+  };
+  if (!missions.find(item => item.id === mission.id)) missions.unshift(mission);
+  closeStory();
+  openSubmit({ stopPropagation() {} }, mission.id);
+}
+
+function openCreateMission() {
+  document.getElementById('create-title').value = '';
+  document.getElementById('create-desc').value = '';
+  document.getElementById('create-mission').classList.add('open');
+}
+
+async function publishUserMission() {
+  const title = document.getElementById('create-title').value.trim();
+  const desc = document.getElementById('create-desc').value.trim();
+  if (title.length < 4 || desc.length < 12) {
+    showToast('Добавь название и понятное описание');
+    return;
+  }
+  const mission = {
+    id: `u_${Date.now()}`,
+    title,
+    place: 'Задание участника',
+    xp: 25,
+    level: 'easy',
+    tags: ['От игрока'],
+    check: 'manual',
+    desc,
+    userCreated: true
+  };
+  missions.unshift(mission);
+  document.getElementById('create-mission').classList.remove('open');
+  renderAll();
+  showToast('Задание добавлено в ленту');
+  await saveCommunityMission(mission);
+}
+
+async function saveCommunityMission(mission) {
+  const services = await ensureFirebase();
+  if (!services || !player) return;
+  try {
+    await services.db.collection('communityMissions').doc(mission.id).set({
+      ...mission,
+      createdBy: player.id,
+      createdByName: player.name,
+      status: 'pending',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (error) {
+    console.warn('Community mission save failed', error);
+  }
+}
+
+async function loadStoriesFromFirebase() {
+  const services = await ensureFirebase();
+  if (!services) return;
+  try {
+    const snap = await services.db.collection('stories').orderBy('createdAt', 'desc').limit(30).get();
+    const loaded = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    stories = loaded.length ? loaded : [...demoStories];
+    renderStories();
+  } catch (error) {
+    console.warn('Stories load failed', error);
+    stories = [...demoStories];
+    renderStories();
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[char]);
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#096;');
 }
 function renderLeaderboard() {
   const list = document.getElementById('leaderboard');
@@ -914,6 +1223,7 @@ async function submitMission(options = {}) {
     referredBy: player.referredBy || '',
     missionId: activeMission.id,
     missionTitle: activeMission.title,
+    missionDesc: activeMission.desc || '',
     xp: activeMission.xp,
     note: note || (options.autoRecorded ? 'Кружок записан на сайте и отправлен автоматически.' : ''),
     fileName: file?.name || '',
@@ -1027,6 +1337,7 @@ function showToast(message) {
 }
 function renderAll() {
   renderUser();
+  renderStories();
   renderMissions();
   renderLeaderboard();
   updateAuthGate();
@@ -1034,7 +1345,7 @@ function renderAll() {
 
 renderAll();
 if (isAuthorized()) {
-  savePlayerToFirebase().then(syncProgressFromFirebase);
+  savePlayerToFirebase().then(syncProgressFromFirebase).then(loadStoriesFromFirebase);
   if (!state.onboarded) setTimeout(openOnboarding, 350);
 }
 </script>
