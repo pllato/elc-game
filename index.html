@@ -108,6 +108,8 @@
     margin: 14px 2px 9px; color: var(--muted); text-transform: uppercase;
     font-size: 11px; font-weight: 800; letter-spacing: .06em;
   }
+  .section-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .section-row .section-title { margin-bottom: 9px; }
   .stories-rail {
     display: flex; gap: 10px; overflow-x: auto; padding: 2px 1px 12px;
     scrollbar-width: none;
@@ -138,6 +140,30 @@
     border: 0; border-radius: 999px; padding: 10px 12px; background: var(--blue);
     color: #fff; font-size: 12px; font-weight: 900; white-space: nowrap;
   }
+  .challenge-rail {
+    display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 2px 1px 12px;
+  }
+  .challenge-rail::-webkit-scrollbar { display: none; }
+  .challenge-card {
+    width: 238px; flex: 0 0 auto; background: #fff; border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px; display: grid; gap: 9px;
+  }
+  .challenge-card strong { font-size: 14px; line-height: 1.25; }
+  .challenge-card p { color: var(--muted); font-size: 11px; line-height: 1.4; }
+  .challenge-progress { height: 7px; border-radius: 999px; background: #E9EEFF; overflow: hidden; }
+  .challenge-progress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green), var(--blue)); }
+  .feed-tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;
+  }
+  .feed-tab {
+    border: 1px solid var(--border); background: #fff; color: var(--muted);
+    border-radius: 8px; padding: 10px; font-size: 12px; font-weight: 900;
+  }
+  .feed-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .history-toggle {
+    width: 100%; border: 0; border-radius: 8px; padding: 10px; margin-bottom: 10px;
+    background: #E9EEFF; color: var(--blue); font-size: 12px; font-weight: 900;
+  }
   .daily-path {
     position: relative; display: grid; gap: 12px; padding: 2px 0 8px;
   }
@@ -162,6 +188,20 @@
   .path-copy p { color: var(--muted); font-size: 12px; line-height: 1.45; margin-bottom: 9px; }
   .path-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
   .path-meta .tag { padding: 4px 8px; }
+  .mission-social { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+  .mini-avatars { display: flex; align-items: center; }
+  .mini-avatar {
+    width: 25px; height: 25px; border-radius: 50%; border: 2px solid #fff; margin-left: -6px;
+    background: #E9EEFF; color: var(--blue); display: grid; place-items: center;
+    font-size: 9px; font-weight: 900; overflow: hidden;
+  }
+  .mini-avatar:first-child { margin-left: 0; }
+  .mini-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .like-btn {
+    border: 0; border-radius: 999px; background: #FDE8E4; color: var(--red);
+    padding: 7px 10px; font-size: 11px; font-weight: 900;
+  }
+  .like-btn.liked { background: var(--red); color: #fff; }
   .path-action {
     margin-top: 10px; border: 0; border-radius: 8px; padding: 10px 12px;
     background: var(--blue); color: #fff; font-size: 12px; font-weight: 900;
@@ -351,20 +391,26 @@
   .story-user span { display: block; color: rgba(255,255,255,.65); font-size: 11px; }
   .story-close { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; font-weight: 900; }
   .story-media {
-    position: relative; border-radius: 18px; overflow: hidden; background: #111827;
-    min-height: 0; height: 100%; display: grid; place-items: center;
+    position: relative; border-radius: 50%; overflow: hidden; background: #111827;
+    width: min(88vw, 540px); aspect-ratio: 1; align-self: center; justify-self: center;
+    min-height: 0; display: grid; place-items: center;
     touch-action: pan-y;
+    box-shadow: 0 22px 60px rgba(0,0,0,.35), 0 0 0 10px rgba(255,255,255,.04);
   }
   .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
   .story-fallback { color: rgba(255,255,255,.74); font-weight: 800; }
   .story-task {
-    position: absolute; left: 12px; right: 12px; bottom: 12px;
+    position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+    width: min(88%, 430px);
     background: rgba(7,11,24,.72); border: 1px solid rgba(255,255,255,.14);
     border-radius: 8px; padding: 12px; backdrop-filter: blur(12px);
   }
   .story-task strong { display: block; font-size: 14px; margin-bottom: 4px; }
   .story-task span { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
-  .story-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .story-inline { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-top: 9px; }
+  .story-inline button { border: 0; border-radius: 8px; padding: 9px 10px; font-size: 11px; font-weight: 900; background: var(--red); color: #fff; }
+  .story-stats { color: rgba(255,255,255,.76); font-size: 11px; font-weight: 800; }
+  .story-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .story-actions button {
     border: 0; border-radius: 8px; padding: 11px 8px; font-size: 12px; font-weight: 900;
     background: rgba(255,255,255,.12); color: #fff;
@@ -385,6 +431,16 @@
     color: var(--text); background: #fff; font-size: 14px;
   }
   .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .profile-section { margin-top: 12px; }
+  .simple-list { display: grid; gap: 8px; }
+  .simple-item {
+    background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 11px;
+    display: grid; gap: 7px;
+  }
+  .simple-item strong { font-size: 13px; }
+  .simple-item span { color: var(--muted); font-size: 11px; }
+  .badge-row { display: flex; gap: 7px; flex-wrap: wrap; }
+  .badge-chip { background: #E9EEFF; color: var(--blue); border-radius: 999px; padding: 7px 9px; font-size: 11px; font-weight: 900; }
   .toast {
     position: fixed; left: 50%; bottom: 92px; transform: translate(-50%, 12px);
     max-width: calc(100vw - 32px); background: #101B3D; color: #fff;
@@ -466,14 +522,19 @@
 <main class="app-shell" id="app-shell">
   <section class="screen active" id="screen-missions">
     <div class="hero">
-      <h1>Кружки Алматы</h1>
-      <p>Смотри короткие кружки, повторяй задания и записывай свои. Город здесь не как маршрут, а как твоя обычная жизнь: улица, школа, кофе, друзья, район.</p>
+      <h1>ELC English Quest</h1>
+      <p>Короткая ежедневная практика английского: смотри кружки, выполняй задания, создавай свои темы и собирай XP вместе с участниками Алматы.</p>
       <div class="hero-actions">
         <button class="secondary" onclick="openOnboarding()">Как играть</button>
       </div>
     </div>
     <div class="section-title">Кружки участников</div>
     <div class="stories-rail" id="stories-rail"></div>
+    <div class="section-row">
+      <div class="section-title">Челленджи</div>
+      <button class="mini-btn" onclick="shareChallenge()">Пригласить</button>
+    </div>
+    <div class="challenge-rail" id="challenge-rail"></div>
     <div class="quick-create">
       <div>
         <strong>Есть идея для задания?</strong>
@@ -481,7 +542,12 @@
       </div>
       <button class="mini-btn" onclick="openCreateMission()">Создать</button>
     </div>
-    <div class="section-title">Задания дня</div>
+    <div class="section-title">Лента заданий</div>
+    <div class="feed-tabs">
+      <button class="feed-tab active" data-feed="daily" onclick="setFeed('daily')">Задания дня</button>
+      <button class="feed-tab" data-feed="community" onclick="setFeed('community')">От участников</button>
+    </div>
+    <button class="history-toggle" id="history-toggle" onclick="toggleDoneHistory()">Показать выполненные</button>
     <div id="missions-list"></div>
   </section>
 
@@ -529,6 +595,22 @@
         <strong>English Lifestyle Communication</strong>
         <span>Разговорный английский и городская практика</span>
       </div>
+    </div>
+    <div class="profile-section">
+      <div class="section-title">Мои кружки</div>
+      <div class="simple-list" id="my-stories"></div>
+    </div>
+    <div class="profile-section">
+      <div class="section-title">Подписки</div>
+      <div class="simple-list" id="following-list"></div>
+    </div>
+    <div class="profile-section">
+      <div class="section-title">Значки</div>
+      <div class="badge-row" id="badges-list"></div>
+    </div>
+    <div class="profile-section">
+      <div class="section-title">Активные челленджи</div>
+      <div class="simple-list" id="profile-challenges"></div>
     </div>
   </section>
 </main>
@@ -598,9 +680,10 @@
     </div>
     <div class="story-media" id="story-media" onclick="nextStory()" ontouchstart="storyTouchStart(event)" ontouchend="storyTouchEnd(event)"></div>
     <div class="story-actions">
-      <button onclick="likeStory()">Нравится</button>
-      <button onclick="followStory()">В друзья</button>
-      <button class="primary" onclick="repeatStoryMission()">Выполнить</button>
+      <button onclick="likeStory()">Лайк</button>
+      <button onclick="commentStory()">Коммент</button>
+      <button onclick="followStory()" id="follow-story-btn">Подписаться</button>
+      <button onclick="reportStory()">Жалоба</button>
     </div>
   </div>
 </div>
@@ -665,10 +748,26 @@ const demoStories = [
   { id: 'demo_3', playerName: 'Алина', missionId: '03', missionTitle: 'Что я ем сегодня', missionDesc: 'Покажи еду и опиши её на английском.', fileUrl: '', likes: 7 }
 ];
 
+const demoCommunityMissions = [
+  { id: 'c_1', title: 'Любимый фильм', place: 'Где угодно', xp: 25, level: 'easy', tags: ['От участников'], desc: 'Назови фильм, жанр и почему ты советуешь его посмотреть.', likes: 18, createdByName: 'Platon Tsay', createdAtMs: Date.now() - 2 * 60 * 60 * 1000 },
+  { id: 'c_2', title: 'Мой район за 3 слова', place: 'Где угодно', xp: 25, level: 'easy', tags: ['От участников'], desc: 'Опиши свой район тремя английскими словами и объясни одно из них.', likes: 12, createdByName: 'Мария', createdAtMs: Date.now() - 5 * 60 * 60 * 1000 },
+  { id: 'c_3', title: 'Что в моём рюкзаке', place: 'Дом или школа', xp: 25, level: 'easy', tags: ['От участников'], desc: 'Покажи одну вещь из сумки и объясни, зачем она тебе сегодня.', likes: 7, createdByName: 'Алина', createdAtMs: Date.now() - 9 * 60 * 60 * 1000 }
+];
+
+const challenges = [
+  { id: 'week', title: '7 дней практики', desc: 'Записывай по одному кружку каждый день неделю.', target: 7, unit: 'дней', xp: 150 },
+  { id: 'month', title: '30 дней английского', desc: 'Месяц ежедневных коротких ответов.', target: 30, unit: 'дней', xp: 700 },
+  { id: 'record', title: 'Личный рекорд XP', desc: 'Попробуй набрать 100 XP за сегодня.', target: 100, unit: 'XP', xp: 120 },
+  { id: 'year', title: 'Годовая привычка', desc: 'Большой путь ELC: возвращайся к практике весь год.', target: 365, unit: 'дней', xp: 5000 }
+];
+
 let state = loadState();
 let player = loadPlayer();
 let activeMission = null;
 let stories = [...demoStories];
+let communityMissions = [...demoCommunityMissions];
+let activeFeed = 'daily';
+let showDoneHistory = false;
 let storyGroups = [];
 let activeStoryGroupIndex = 0;
 let activeStoryItemIndex = 0;
@@ -684,10 +783,24 @@ const RECORD_LIMIT_SECONDS = 30;
 
 function loadState() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { xp: 0, statuses: {}, referrals: 0, onboarded: false, submissions: [] };
+    return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)));
   } catch {
-    return { xp: 0, statuses: {}, referrals: 0, onboarded: false, submissions: [] };
+    return normalizeState(null);
   }
+}
+function normalizeState(value) {
+  return {
+    xp: Number(value?.xp || 0),
+    statuses: value?.statuses || {},
+    referrals: Number(value?.referrals || 0),
+    onboarded: Boolean(value?.onboarded),
+    submissions: Array.isArray(value?.submissions) ? value.submissions : [],
+    likedStories: value?.likedStories || {},
+    likedMissions: value?.likedMissions || {},
+    following: value?.following || {},
+    activeChallenges: value?.activeChallenges || {},
+    badges: Array.isArray(value?.badges) ? value.badges : []
+  };
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 function loadPlayer() {
@@ -861,9 +974,24 @@ function unlockedIndex() {
 }
 function renderMissions() {
   const list = document.getElementById('missions-list');
+  document.querySelectorAll('.feed-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.feed === activeFeed));
+  const historyToggle = document.getElementById('history-toggle');
+  if (historyToggle) historyToggle.style.display = activeFeed === 'daily' ? 'block' : 'none';
+  if (activeFeed === 'community') {
+    renderCommunityMissions(list);
+    return;
+  }
   const openUntil = unlockedIndex();
+  const visible = missions.filter((m, index) => {
+    if (showDoneHistory) return true;
+    const status = state.statuses[m.id] || 'new';
+    if (status !== 'done') return index <= openUntil + 1;
+    return index >= Math.max(0, openUntil - 2) && index <= openUntil;
+  });
+  if (historyToggle) historyToggle.textContent = showDoneHistory ? 'Скрыть выполненные' : 'Показать выполненные';
   list.className = 'daily-path';
-  list.innerHTML = missions.map((m, index) => {
+  list.innerHTML = visible.map(m => {
+    const index = missions.findIndex(item => item.id === m.id);
     const status = state.statuses[m.id] || 'new';
     const locked = index > openUntil;
     const cardState = locked ? 'locked' : status === 'done' ? 'done' : status === 'pending' ? 'pending' : 'active';
@@ -881,10 +1009,86 @@ function renderMissions() {
             <span class="tag ${statusClass}">${statusTag}</span>
             <span class="xp-badge">+${m.xp} XP</span>
           </div>
+          ${missionSocialHtml(m)}
           <button class="path-action" ${locked || status !== 'new' ? 'disabled' : ''} onclick="openSubmit(event, '${m.id}')">${btnText}</button>
         </div>
       </article>`;
   }).join('');
+}
+
+function renderCommunityMissions(list) {
+  list.className = 'daily-path';
+  const fresh = communityMissions
+    .filter(m => Date.now() - Number(m.createdAtMs || Date.now()) < 24 * 60 * 60 * 1000)
+    .sort((a, b) => missionLikes(b.id, b.likes) - missionLikes(a.id, a.likes));
+  list.innerHTML = fresh.map((m, index) => `
+    <article class="path-card active">
+      <div class="path-node">${index + 1}</div>
+      <div class="path-copy">
+        <h3>${escapeHtml(m.title)}</h3>
+        <p>${escapeHtml(m.desc)}</p>
+        <div class="path-meta">
+          <span class="tag easy">${escapeHtml(m.createdByName || 'Участник')}</span>
+          <span class="tag state">24 часа</span>
+          <span class="xp-badge">+${Number(m.xp || 25)} XP</span>
+        </div>
+        ${missionSocialHtml(m)}
+        <button class="path-action" onclick="openSubmit(event, '${m.id}')">Записать кружок</button>
+      </div>
+    </article>
+  `).join('') || '<div class="notice"><strong>Пока пусто.</strong> Создай первое задание дня от участника.</div>';
+}
+
+function setFeed(feed) {
+  activeFeed = feed;
+  renderMissions();
+}
+
+function toggleDoneHistory() {
+  showDoneHistory = !showDoneHistory;
+  renderMissions();
+}
+
+function missionLikes(id, base = 0) {
+  return Number(base || 0) + (state.likedMissions?.[id] ? 1 : 0);
+}
+
+function missionSocialHtml(mission) {
+  const avatars = storyAvatarsForMission(mission.id);
+  return `
+    <div class="mission-social">
+      <button class="like-btn ${state.likedMissions?.[mission.id] ? 'liked' : ''}" onclick="event.stopPropagation(); likeMission('${mission.id}')">♥ ${missionLikes(mission.id, mission.likes)}</button>
+      <button class="like-btn" onclick="event.stopPropagation(); openMissionStories('${mission.id}')">Кружки ${avatars.length}</button>
+      <div class="mini-avatars">${avatars.slice(0, 4).map(storyAvatarHtml).join('')}</div>
+    </div>
+  `;
+}
+
+function storyAvatarsForMission(missionId) {
+  return (stories.length ? stories : demoStories).filter(story => story.missionId === missionId);
+}
+
+function storyAvatarHtml(story) {
+  const content = story.playerPhotoUrl ? `<img src="${escapeAttr(story.playerPhotoUrl)}" alt="">` : initials(story.playerName);
+  return `<span class="mini-avatar">${content}</span>`;
+}
+
+function likeMission(id) {
+  state.likedMissions[id] = !state.likedMissions[id];
+  if (!state.likedMissions[id]) delete state.likedMissions[id];
+  saveState();
+  renderMissions();
+  showToast(state.likedMissions[id] ? 'Голос учтён' : 'Голос снят');
+}
+
+function openMissionStories(missionId) {
+  const groupIndex = storyGroups.findIndex(group => group.items.some(item => item.missionId === missionId));
+  if (groupIndex >= 0) {
+    const itemIndex = storyGroups[groupIndex].items.findIndex(item => item.missionId === missionId);
+    openStory(groupIndex, Math.max(0, itemIndex));
+  } else {
+    showToast('По этому заданию пока нет кружков');
+  }
 }
 
 function renderStories() {
@@ -992,11 +1196,18 @@ function renderStoryViewer() {
   const avatar = document.getElementById('story-user-avatar');
   if (group?.playerPhotoUrl) avatar.innerHTML = `<img src="${escapeAttr(group.playerPhotoUrl)}" alt="">`;
   else avatar.textContent = initials(group?.playerName || story.playerName);
+  const followBtn = document.getElementById('follow-story-btn');
+  const followKey = story.playerId || story.playerName;
+  if (followBtn) followBtn.textContent = state.following?.[followKey] ? 'Отписаться' : 'Подписаться';
   const media = document.getElementById('story-media');
   const task = `
     <div class="story-task">
       <strong>${escapeHtml(story.missionTitle || 'Задание')}</strong>
       <span>${escapeHtml(story.missionDesc || story.note || 'Повтори это задание и запиши свой кружок.')}</span>
+      <div class="story-inline">
+        <span class="story-stats">♥ ${storyLikes(story)} · ${story.commentsCount || 0} комм.</span>
+        <button onclick="event.stopPropagation(); repeatStoryMission()">Записать ответ</button>
+      </div>
     </div>`;
   if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
     media.innerHTML = `${storyNavButtons()}<img src="${escapeAttr(story.fileUrl)}" alt="">${task}`;
@@ -1032,15 +1243,42 @@ function preloadStoryMedia() {
 function likeStory() {
   const story = currentStory();
   if (!story) return;
-  const key = `liked_${story.id}`;
-  localStorage.setItem(key, '1');
-  showToast('Лайк поставлен');
+  state.likedStories[story.id] = !state.likedStories[story.id];
+  if (!state.likedStories[story.id]) delete state.likedStories[story.id];
+  saveState();
+  renderStoryViewer();
+  showToast(state.likedStories[story.id] ? 'Лайк поставлен' : 'Лайк снят');
 }
 
 function followStory() {
   const story = currentStory();
   if (!story) return;
-  showToast(`${story.playerName || 'Участник'} добавлен в друзья`);
+  const key = story.playerId || story.playerName;
+  if (state.following[key]) delete state.following[key];
+  else state.following[key] = { playerId: story.playerId || '', name: story.playerName || 'Участник' };
+  saveState();
+  renderStoryViewer();
+  renderProfileSocial();
+  showToast(state.following[key] ? 'Подписка оформлена' : 'Вы отписались');
+}
+
+function storyLikes(story) {
+  return Number(story.likes || 0) + (state.likedStories?.[story.id] ? 1 : 0);
+}
+
+function commentStory() {
+  const text = prompt('Комментарий к кружку');
+  if (!text?.trim()) return;
+  const story = currentStory();
+  story.commentsCount = Number(story.commentsCount || 0) + 1;
+  showToast('Комментарий добавлен');
+  renderStoryViewer();
+}
+
+function reportStory() {
+  const reason = prompt('Причина жалобы: неуместный контент, не по теме или нарушение правил');
+  if (!reason?.trim()) return;
+  showToast('Жалоба отправлена администратору');
 }
 
 function repeatStoryMission() {
@@ -1082,12 +1320,16 @@ async function publishUserMission() {
     tags: ['От игрока'],
     check: 'manual',
     desc,
-    userCreated: true
+    userCreated: true,
+    createdByName: player?.name || 'Участник',
+    createdAtMs: Date.now(),
+    likes: 0
   };
-  missions.unshift(mission);
+  communityMissions.unshift(mission);
+  activeFeed = 'community';
   document.getElementById('create-mission').classList.remove('open');
   renderAll();
-  showToast('Задание добавлено в ленту');
+  showToast('Задание добавлено в ленту участников на 24 часа');
   await saveCommunityMission(mission);
 }
 
@@ -1125,6 +1367,27 @@ async function loadStoriesFromFirebase() {
   }
 }
 
+async function loadCommunityMissionsFromFirebase() {
+  const services = await ensureFirebase();
+  if (!services) return;
+  try {
+    const snap = await services.db.collection('communityMissions').orderBy('createdAt', 'desc').limit(40).get();
+    const loaded = snap.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAtMs: data.createdAt?.toMillis ? data.createdAt.toMillis() : Number(data.createdAtMs || Date.now()),
+        likes: Number(data.likes || 0)
+      };
+    });
+    communityMissions = loaded.length ? loaded : [...demoCommunityMissions];
+    renderMissions();
+  } catch (error) {
+    console.warn('Community missions load failed', error);
+  }
+}
+
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({
     '&': '&amp;',
@@ -1152,6 +1415,131 @@ function renderLeaderboard() {
   `).join('');
 }
 
+function renderChallenges() {
+  const root = document.getElementById('challenge-rail');
+  if (!root) return;
+  root.innerHTML = challenges.map(challenge => {
+    const accepted = state.activeChallenges[challenge.id];
+    const progress = challengeProgress(challenge);
+    const pct = Math.min(100, Math.round((progress / challenge.target) * 100));
+    return `
+      <article class="challenge-card">
+        <strong>${escapeHtml(challenge.title)}</strong>
+        <p>${escapeHtml(challenge.desc)}</p>
+        <div class="challenge-progress"><span style="width:${pct}%"></span></div>
+        <p>${progress}/${challenge.target} ${challenge.unit} · +${challenge.xp} XP</p>
+        <button class="${accepted ? 'secondary' : 'primary'}" onclick="acceptChallenge('${challenge.id}')">${accepted ? 'Активен' : 'Принять челлендж'}</button>
+      </article>
+    `;
+  }).join('');
+  renderProfileChallenges();
+}
+
+function challengeProgress(challenge) {
+  if (challenge.id === 'record') return Math.min(challenge.target, state.xp % 100);
+  return Math.min(challenge.target, Object.values(state.statuses).filter(s => s === 'done').length);
+}
+
+function acceptChallenge(id) {
+  const challenge = challenges.find(item => item.id === id);
+  if (!challenge) return;
+  state.activeChallenges[id] = state.activeChallenges[id] || { startedAt: Date.now(), title: challenge.title };
+  saveState();
+  renderChallenges();
+  showToast('Челлендж принят. Задание на сегодня уже в ленте.');
+}
+
+function shareChallenge() {
+  const text = `Прими челлендж в ELC English Quest: ${APP_URL}`;
+  if (navigator.share) navigator.share({ text, url: APP_URL }).catch(() => {});
+  else {
+    navigator.clipboard?.writeText(text);
+    showToast('Ссылка на челлендж скопирована');
+  }
+}
+
+function renderProfileSocial() {
+  const myStories = document.getElementById('my-stories');
+  if (myStories) {
+    const mine = stories.filter(story => story.playerId && story.playerId === player?.id);
+    myStories.innerHTML = mine.map(story => `
+      <div class="simple-item">
+        <strong>${escapeHtml(story.missionTitle || 'Кружок')}</strong>
+        <span>♥ ${storyLikes(story)} · ${escapeHtml(story.moderationStatus || 'active')}</span>
+        <button class="secondary" onclick="openMyStory('${story.id}')">Открыть</button>
+        <button class="secondary" onclick="deleteMyStory('${story.id}')">Удалить из ленты</button>
+      </div>
+    `).join('') || '<div class="notice">Твои опубликованные кружки появятся здесь.</div>';
+  }
+  const following = document.getElementById('following-list');
+  if (following) {
+    const items = Object.entries(state.following || {});
+    following.innerHTML = items.map(([key, value]) => `
+      <div class="simple-item">
+        <strong>${escapeHtml(value.name || key)}</strong>
+        <button class="secondary" onclick="unfollow('${escapeAttr(key)}')">Отписаться</button>
+      </div>
+    `).join('') || '<div class="notice">Подписки появятся после просмотра сторис.</div>';
+  }
+  const badges = document.getElementById('badges-list');
+  if (badges) {
+    const done = Object.values(state.statuses).filter(s => s === 'done').length;
+    const earned = [
+      done >= 1 ? 'Первый кружок' : '',
+      done >= 5 ? '5 заданий' : '',
+      state.xp >= 100 ? '100 XP' : '',
+      Object.keys(state.activeChallenges || {}).length ? 'Челлендж принят' : ''
+    ].filter(Boolean);
+    badges.innerHTML = earned.map(name => `<span class="badge-chip">${escapeHtml(name)}</span>`).join('') || '<span class="badge-chip">Начни первый челлендж</span>';
+  }
+  renderProfileChallenges();
+}
+
+function renderProfileChallenges() {
+  const root = document.getElementById('profile-challenges');
+  if (!root) return;
+  const active = Object.keys(state.activeChallenges || {}).map(id => challenges.find(item => item.id === id)).filter(Boolean);
+  root.innerHTML = active.map(challenge => `
+    <div class="simple-item">
+      <strong>${escapeHtml(challenge.title)}</strong>
+      <span>${challengeProgress(challenge)}/${challenge.target} ${challenge.unit}</span>
+    </div>
+  `).join('') || '<div class="notice">Прими челлендж на главной, и он появится здесь.</div>';
+}
+
+function openMyStory(id) {
+  const groupIndex = storyGroups.findIndex(group => group.items.some(item => item.id === id));
+  if (groupIndex < 0) return;
+  openStory(groupIndex, storyGroups[groupIndex].items.findIndex(item => item.id === id));
+}
+
+function unfollow(key) {
+  delete state.following[key];
+  saveState();
+  renderProfileSocial();
+  showToast('Вы отписались');
+}
+
+async function deleteMyStory(id) {
+  const story = stories.find(item => item.id === id);
+  if (!story || story.playerId !== player?.id) return;
+  story.moderationStatus = 'deleted';
+  stories = stories.filter(item => item.id !== id);
+  const services = await ensureFirebase();
+  if (services) {
+    try {
+      await services.db.collection('stories').doc(id).set({
+        moderationStatus: 'deleted',
+        deletedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.warn('Story delete failed', error);
+    }
+  }
+  renderAll();
+  showToast('Кружок скрыт из ленты');
+}
+
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.screen === name));
@@ -1177,7 +1565,11 @@ function closeOverlay(event, id) {
 function openSubmit(event, id) {
   event.stopPropagation();
   resetCircleRecording();
-  activeMission = missions.find(m => m.id === id);
+  activeMission = missions.find(m => m.id === id) || communityMissions.find(m => m.id === id);
+  if (!activeMission) {
+    showToast('Задание не найдено');
+    return;
+  }
   document.getElementById('submit-title').textContent = activeMission.title;
   document.getElementById('submit-copy').textContent = `${activeMission.place}. Кружок автоматически появится в ленте, а админ сможет скрыть его, если он не по теме.`;
   document.getElementById('submit').classList.add('open');
@@ -1523,14 +1915,16 @@ function showToast(message) {
 function renderAll() {
   renderUser();
   renderStories();
+  renderChallenges();
   renderMissions();
   renderLeaderboard();
+  renderProfileSocial();
   updateAuthGate();
 }
 
 renderAll();
 if (isAuthorized()) {
-  savePlayerToFirebase().then(syncProgressFromFirebase).then(loadStoriesFromFirebase);
+  savePlayerToFirebase().then(syncProgressFromFirebase).then(loadStoriesFromFirebase).then(loadCommunityMissionsFromFirebase);
   if (!state.onboarded) setTimeout(openOnboarding, 350);
 }
 </script>
