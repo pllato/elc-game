@@ -391,13 +391,13 @@
   .story-user span { display: block; color: rgba(255,255,255,.65); font-size: 11px; }
   .story-close { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; font-weight: 900; }
   .story-media {
-    position: relative; border-radius: 50%; overflow: hidden; background: #111827;
+    position: relative; border-radius: 50%; overflow: visible; background: #111827;
     width: min(78vw, 360px, 48svh); aspect-ratio: 1; align-self: center;
     min-height: 0; display: grid; place-items: center;
     touch-action: pan-y;
     box-shadow: 0 18px 44px rgba(0,0,0,.35), 0 0 0 8px rgba(255,255,255,.04);
   }
-  .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
+  .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; overflow: hidden; }
   .story-fallback { color: rgba(255,255,255,.74); font-weight: 800; }
   .story-detail {
     background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
@@ -405,8 +405,13 @@
   }
   .story-detail strong { display: block; font-size: 14px; margin-bottom: 4px; }
   .story-detail span { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
-  .story-inline { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-top: 9px; }
-  .story-inline button { border: 0; border-radius: 8px; padding: 9px 10px; font-size: 11px; font-weight: 900; background: var(--red); color: #fff; white-space: nowrap; }
+  .story-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .story-chip {
+    border: 0; border-radius: 999px; padding: 8px 10px; font-size: 11px; font-weight: 900;
+    background: rgba(255,255,255,.12); color: #fff; white-space: nowrap;
+  }
+  .story-chip.primary { background: var(--red); }
+  .story-chip.ghost { background: transparent; color: rgba(255,255,255,.62); padding-inline: 4px; }
   .story-stats { color: rgba(255,255,255,.76); font-size: 11px; font-weight: 800; }
   .story-spacer { flex: 1; min-height: 2px; }
   .practice-thread {
@@ -417,12 +422,19 @@
     background: rgba(255,255,255,.07); border-radius: 8px; padding: 8px;
     font-size: 11px; color: rgba(255,255,255,.78);
   }
-  .story-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .story-actions button {
-    border: 0; border-radius: 8px; padding: 10px 6px; font-size: 11px; font-weight: 900;
-    background: rgba(255,255,255,.12); color: #fff;
+  .practice-reply video {
+    display: block; width: 100%; max-height: 220px; border-radius: 8px; margin-top: 6px; object-fit: cover;
   }
-  .story-actions .primary { background: var(--red); }
+  .thread-recorder {
+    margin-top: 10px; background: rgba(255,255,255,.07); border-radius: 8px; padding: 10px; display: none; gap: 8px;
+  }
+  .thread-recorder.open { display: grid; }
+  .thread-preview {
+    width: 92px; height: 92px; border-radius: 50%; background: rgba(255,255,255,.12);
+    display: grid; place-items: center; overflow: hidden; justify-self: center; color: rgba(255,255,255,.7); font-weight: 900;
+  }
+  .thread-preview video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+  .story-actions { display: none; }
   .story-count { color: rgba(255,255,255,.56); font-size: 11px; margin-left: 6px; }
   .story-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
@@ -430,8 +442,8 @@
     background: rgba(255,255,255,.16); color: #fff; font-size: 24px; font-weight: 900;
     display: grid; place-items: center;
   }
-  .story-nav.prev { left: 10px; }
-  .story-nav.next { right: 10px; }
+  .story-nav.prev { left: -42px; }
+  .story-nav.next { right: -42px; }
   .create-fields { display: grid; gap: 10px; margin: 12px 0; }
   .create-fields input, .create-fields textarea {
     width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
@@ -684,12 +696,6 @@
     <div class="story-media" id="story-media" onclick="nextStory()" ontouchstart="storyTouchStart(event)" ontouchend="storyTouchEnd(event)"></div>
     <div class="story-detail" id="story-detail"></div>
     <div class="story-spacer"></div>
-    <div class="story-actions">
-      <button onclick="likeStory()">Лайк</button>
-      <button onclick="helpStory()">Помочь</button>
-      <button onclick="followStory()" id="follow-story-btn">Подписаться</button>
-      <button onclick="reportStory()">Жалоба</button>
-    </div>
   </div>
 </div>
 
@@ -778,6 +784,10 @@ let circleDiscardStop = false;
 let recordTimerId = null;
 let recordStartedAt = 0;
 const RECORD_LIMIT_SECONDS = 30;
+let threadRecorder = null;
+let threadStream = null;
+let threadChunks = [];
+let threadRecordedFile = null;
 
 function loadState() {
   try {
@@ -1135,6 +1145,7 @@ function closeStory() {
   document.getElementById('story-viewer').classList.remove('open');
   document.getElementById('story-media').innerHTML = '';
   document.getElementById('story-detail').innerHTML = '';
+  stopThreadRecording();
 }
 
 function nextStory() {
@@ -1209,12 +1220,24 @@ function renderStoryViewer() {
       <strong>${escapeHtml(story.missionTitle || 'Задание')}</strong>
       <span>${escapeHtml(story.missionDesc || story.note || 'Повтори это задание и запиши свой кружок.')}</span>
       <div class="story-inline">
-        <span class="story-stats">♥ ${storyLikes(story)} · ${story.commentsCount || 0} комм.</span>
-        <button onclick="event.stopPropagation(); repeatStoryMission()">Записать ответ</button>
+        <button class="story-chip" onclick="event.stopPropagation(); likeStory()">♥ ${storyLikes(story)}</button>
+        <button class="story-chip" onclick="event.stopPropagation(); followStory()" id="follow-story-btn-inline">${state.following?.[followKey] ? 'Отписаться' : 'Подписаться'}</button>
+        <button class="story-chip" onclick="event.stopPropagation(); addTextHelp()">Комментарий</button>
+        <button class="story-chip primary" onclick="event.stopPropagation(); openThreadRecorder()">Видео-ответ</button>
+        <button class="story-chip" onclick="event.stopPropagation(); repeatStoryMission()">Открыть задание</button>
+        <button class="story-chip ghost" onclick="event.stopPropagation(); reportStory()">Пожаловаться</button>
       </div>
       <div class="practice-thread">
         <strong>Ветка помощи</strong>
         ${practiceThreadHtml(story)}
+      </div>
+      <div class="thread-recorder" id="thread-recorder">
+        <div class="thread-preview" id="thread-preview">Видео</div>
+        <span id="thread-status">Запиши короткий видео-ответ в ветку.</span>
+        <div class="story-inline">
+          <button class="story-chip primary" id="thread-record-btn" onclick="event.stopPropagation(); toggleThreadRecording()">Начать</button>
+          <button class="story-chip" id="thread-publish-btn" onclick="event.stopPropagation(); publishThreadVideo()" disabled>Выложить в ветку</button>
+        </div>
       </div>
   `;
   if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
@@ -1262,7 +1285,13 @@ function practiceThreadHtml(story) {
   const replies = state.practiceReplies?.[story.id] || [
     { name: 'ELC', text: 'Можно оставить подсказку по произношению или записать кружок с примером.' }
   ];
-  return replies.map(reply => `<div class="practice-reply"><strong>${escapeHtml(reply.name)}</strong>: ${escapeHtml(reply.text)}</div>`).join('');
+  return replies.map(reply => `
+    <div class="practice-reply">
+      <strong>${escapeHtml(reply.name)}</strong>${reply.type === 'video' ? ' · видео-ответ' : ''}
+      ${reply.text ? `<div>${escapeHtml(reply.text)}</div>` : ''}
+      ${reply.url ? `<video src="${escapeAttr(reply.url)}" controls playsinline></video>` : ''}
+    </div>
+  `).join('');
 }
 
 function followStory() {
@@ -1281,7 +1310,7 @@ function storyLikes(story) {
   return Number(story.likes || 0) + (state.likedStories?.[story.id] ? 1 : 0);
 }
 
-function helpStory() {
+function addTextHelp() {
   const text = prompt('Напиши подсказку по английскому или произношению');
   if (!text?.trim()) return;
   const story = currentStory();
@@ -1295,6 +1324,96 @@ function helpStory() {
   showToast('+10 XP за помощь с практикой');
   renderStoryViewer();
   renderAll();
+}
+
+function helpStory() {
+  addTextHelp();
+}
+
+function openThreadRecorder() {
+  document.getElementById('thread-recorder')?.classList.add('open');
+}
+
+async function toggleThreadRecording() {
+  if (threadRecorder && threadRecorder.state === 'recording') {
+    threadRecorder.stop();
+    return;
+  }
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    showToast('Запись видео не поддерживается');
+    return;
+  }
+  threadChunks = [];
+  threadRecordedFile = null;
+  threadStream = await navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 } },
+    audio: true
+  });
+  const preview = document.getElementById('thread-preview');
+  preview.innerHTML = '<video id="thread-video" autoplay muted playsinline></video>';
+  document.getElementById('thread-video').srcObject = threadStream;
+  const mimeType = bestRecorderMimeType();
+  threadRecorder = new MediaRecorder(threadStream, {
+    ...(mimeType ? { mimeType } : {}),
+    videoBitsPerSecond: 700000,
+    audioBitsPerSecond: 64000
+  });
+  threadRecorder.ondataavailable = event => {
+    if (event.data?.size) threadChunks.push(event.data);
+  };
+  threadRecorder.onstop = handleThreadRecordingStop;
+  threadRecorder.start();
+  document.getElementById('thread-record-btn').textContent = 'Остановить';
+  document.getElementById('thread-status').textContent = 'Идёт запись видео-ответа.';
+  setTimeout(() => {
+    if (threadRecorder?.state === 'recording') threadRecorder.stop();
+  }, 30000);
+}
+
+function handleThreadRecordingStop() {
+  const mimeType = threadRecorder?.mimeType || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+  threadRecordedFile = new File([new Blob(threadChunks, { type: mimeType })], `elc-thread-${Date.now()}.${ext}`, { type: mimeType });
+  stopThreadStream();
+  document.getElementById('thread-preview').innerHTML = `<video src="${URL.createObjectURL(threadRecordedFile)}" controls playsinline></video>`;
+  document.getElementById('thread-record-btn').textContent = 'Перезаписать';
+  document.getElementById('thread-publish-btn').disabled = false;
+  document.getElementById('thread-status').textContent = 'Видео готово. Выложи его в ветку.';
+}
+
+async function publishThreadVideo() {
+  const story = currentStory();
+  if (!story || !threadRecordedFile) return;
+  let url = URL.createObjectURL(threadRecordedFile);
+  if (hasCloudinaryConfig()) {
+    const upload = await uploadToCloudinary(threadRecordedFile, `thread_${story.id}_${Date.now()}`);
+    if (upload.url) url = upload.url;
+  }
+  state.practiceReplies[story.id] = state.practiceReplies[story.id] || [];
+  state.practiceReplies[story.id].push({ name: player?.name || 'Участник', type: 'video', url });
+  state.helpCount += 1;
+  state.helpXp += 15;
+  state.xp += 15;
+  saveState();
+  threadRecordedFile = null;
+  stopThreadRecording();
+  showToast('+15 XP за видео-помощь');
+  renderStoryViewer();
+  renderAll();
+}
+
+function stopThreadStream() {
+  if (threadStream) {
+    threadStream.getTracks().forEach(track => track.stop());
+    threadStream = null;
+  }
+}
+
+function stopThreadRecording() {
+  if (threadRecorder?.state === 'recording') threadRecorder.stop();
+  stopThreadStream();
+  threadRecorder = null;
+  threadChunks = [];
 }
 
 function reportStory() {
