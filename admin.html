@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -56,7 +55,7 @@
   .ghost { background: transparent; color: var(--blue); padding: 8px 0; }
   .login-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
   .panel { padding: 14px; margin-bottom: 14px; }
-  .filters { display: grid; grid-template-columns: 1fr 180px 160px; gap: 10px; margin-top: 12px; }
+  .filters { display: grid; grid-template-columns: 1fr 180px 150px 170px; gap: 10px; margin-top: 12px; }
   .filters input, .filters select {
     width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 11px 12px; color: var(--text); background: #fff;
   }
@@ -145,6 +144,7 @@
           <option value="rejected">Отклонено</option>
         </select>
         <button class="secondary" onclick="loadSubmissions()">Обновить</button>
+        <button class="secondary" onclick="recalculateXP()">Пересчитать XP</button>
       </div>
     </div>
 
@@ -254,8 +254,8 @@ async function setStatus(id, status) {
     reviewedBy: auth.currentUser?.email || ''
   };
   try {
-    await db.collection('submissions').doc(id).update(payload);
     if (status === 'approved') await approvePlayerXP(submission);
+    await db.collection('submissions').doc(id).update(payload);
     showToast(status === 'approved' ? 'Заявка зачтена' : 'Заявка отклонена');
     await loadSubmissions();
   } catch (error) {
@@ -279,6 +279,35 @@ async function approvePlayerXP(submission) {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
   });
+}
+
+async function recalculateXP() {
+  const approved = submissions.filter(item => item.status === 'approved' && item.playerId && item.missionId);
+  const byPlayer = new Map();
+  approved.forEach(item => {
+    if (!byPlayer.has(item.playerId)) byPlayer.set(item.playerId, new Map());
+    const missions = byPlayer.get(item.playerId);
+    if (!missions.has(item.missionId)) missions.set(item.missionId, Number(item.xp || 0));
+  });
+  try {
+    const batch = db.batch();
+    byPlayer.forEach((missions, playerId) => {
+      const approvedMissions = [...missions.keys()];
+      const xp = [...missions.values()].reduce((sum, value) => sum + value, 0);
+      batch.set(db.collection('players').doc(playerId), {
+        xp,
+        approvedCount: approvedMissions.length,
+        approvedMissions,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    });
+    await batch.commit();
+    showToast('XP пересчитан');
+    await loadSubmissions();
+  } catch (error) {
+    console.error(error);
+    showToast('Не получилось пересчитать XP');
+  }
 }
 
 function renderSubmissions() {

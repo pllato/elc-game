@@ -567,6 +567,36 @@ async function savePlayerToFirebase() {
   }, { merge: true });
 }
 
+async function syncProgressFromFirebase() {
+  const services = await ensureFirebase();
+  if (!services || !player?.id) return;
+  try {
+    const playerSnap = await services.db.collection('players').doc(player.id).get();
+    if (playerSnap.exists) {
+      const data = playerSnap.data();
+      state.xp = Number(data.xp || 0);
+      const approved = Array.isArray(data.approvedMissions) ? data.approvedMissions : [];
+      approved.forEach(id => {
+        state.statuses[id] = 'done';
+      });
+    }
+    const submissionSnap = await services.db.collection('submissions')
+      .where('playerId', '==', player.id)
+      .get();
+    submissionSnap.docs.forEach(doc => {
+      const item = doc.data();
+      if (!item.missionId) return;
+      if (item.status === 'approved') state.statuses[item.missionId] = 'done';
+      if (item.status === 'pending' && state.statuses[item.missionId] !== 'done') state.statuses[item.missionId] = 'pending';
+      if (item.status === 'rejected' && state.statuses[item.missionId] === 'pending') state.statuses[item.missionId] = 'new';
+    });
+    saveState();
+    renderAll();
+  } catch (error) {
+    console.warn('Firebase progress sync failed', error);
+  }
+}
+
 function updateAuthGate() {
   const locked = !isAuthorized();
   document.getElementById('auth-gate').classList.toggle('active', locked);
@@ -858,7 +888,7 @@ function renderAll() {
 
 renderAll();
 if (isAuthorized()) {
-  savePlayerToFirebase();
+  savePlayerToFirebase().then(syncProgressFromFirebase);
   if (!state.onboarded) setTimeout(openOnboarding, 350);
 }
 </script>
