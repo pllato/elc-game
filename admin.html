@@ -256,8 +256,12 @@ async function setStatus(id, status) {
   try {
     if (status === 'approved') await approvePlayerXP(submission);
     await db.collection('submissions').doc(id).update(payload);
-    if (status === 'approved') await publishStory(submission);
-    showToast(status === 'approved' ? 'Заявка зачтена' : 'Заявка отклонена');
+    if (status === 'approved') {
+      const story = await publishStorySafely(submission);
+      showToast(story.ok ? 'Заявка зачтена и опубликована в сторис' : `Зачтено, но сторис не создана: ${story.message}`);
+    } else {
+      showToast('Заявка отклонена');
+    }
     await loadSubmissions();
   } catch (error) {
     console.error(error);
@@ -266,7 +270,7 @@ async function setStatus(id, status) {
 }
 
 async function publishStory(submission) {
-  if (!submission.fileUrl) return;
+  if (!submission.fileUrl) throw new Error('нет файла');
   await db.collection('stories').doc(submission.id).set({
     submissionId: submission.id,
     playerId: submission.playerId || '',
@@ -282,6 +286,17 @@ async function publishStory(submission) {
     likes: 0,
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
+}
+
+async function publishStorySafely(submission) {
+  try {
+    await publishStory(submission);
+    return { ok: true, message: '' };
+  } catch (error) {
+    console.error('Story publish failed', error);
+    if (error?.code === 'permission-denied') return { ok: false, message: 'нет доступа в Firestore rules' };
+    return { ok: false, message: error?.message || 'ошибка публикации' };
+  }
 }
 
 async function approvePlayerXP(submission) {
@@ -322,13 +337,25 @@ async function recalculateXP() {
       }, { merge: true });
     });
     await batch.commit();
-    await Promise.all(approved.map(item => publishStory(item)));
-    showToast('XP пересчитан');
+    const results = await Promise.all(approved.map(item => publishStorySafely(item)));
+    const published = results.filter(item => item.ok).length;
+    showToast(`XP пересчитан. Сторис: ${published}/${approved.length}`);
     await loadSubmissions();
   } catch (error) {
     console.error(error);
     showToast('Не получилось пересчитать XP');
   }
+}
+
+async function publishApprovedStory(id) {
+  const submission = submissions.find(item => item.id === id);
+  if (!submission) return;
+  if (submission.status !== 'approved') {
+    showToast('Сначала нужно зачесть заявку');
+    return;
+  }
+  const result = await publishStorySafely(submission);
+  showToast(result.ok ? 'Сторис опубликована' : `Сторис не создана: ${result.message}`);
 }
 
 function renderSubmissions() {
@@ -365,10 +392,13 @@ function renderSubmissions() {
     const file = item.fileUrl
       ? `<a class="file-link" href="${escapeAttr(item.fileUrl)}" target="_blank" rel="noopener">Открыть файл</a>`
       : `<span class="small">Файл не приложен (${escapeHtml(item.fileUploadStatus || 'no_file')})</span>`;
+    const storyButton = item.fileUrl
+      ? `<button class="secondary" onclick="publishApprovedStory('${item.id}')">В сторис</button>`
+      : '';
     const actions = item.status === 'pending'
       ? `<button class="success" onclick="setStatus('${item.id}', 'approved')">Зачесть +${Number(item.xp || 0)} XP</button>
          <button class="danger" onclick="setStatus('${item.id}', 'rejected')">Отклонить</button>`
-      : `<span class="small">Проверил: ${escapeHtml(item.reviewedBy || 'админ')}</span>`;
+      : `<span class="small">Проверил: ${escapeHtml(item.reviewedBy || 'админ')}</span>${item.status === 'approved' ? storyButton : ''}`;
     return `
       <article class="submission">
         <div class="submission-head">

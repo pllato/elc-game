@@ -97,7 +97,7 @@
   }
   .hero h1 { font-family: Unbounded, sans-serif; font-size: 18px; line-height: 1.25; margin-bottom: 8px; }
   .hero p { font-size: 13px; color: var(--muted); line-height: 1.55; }
-  .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .hero-actions { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
   .primary, .secondary {
     border: 0; border-radius: 8px; padding: 11px 10px; font-weight: 800; font-size: 12px;
   }
@@ -341,6 +341,7 @@
   .story-media {
     position: relative; border-radius: 18px; overflow: hidden; background: #111827;
     min-height: 420px; display: grid; place-items: center;
+    touch-action: pan-y;
   }
   .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
   .story-fallback { color: rgba(255,255,255,.74); font-weight: 800; }
@@ -357,6 +358,14 @@
     background: rgba(255,255,255,.12); color: #fff;
   }
   .story-actions .primary { background: var(--red); }
+  .story-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    width: 42px; height: 42px; border: 0; border-radius: 50%;
+    background: rgba(255,255,255,.16); color: #fff; font-size: 24px; font-weight: 900;
+    display: grid; place-items: center;
+  }
+  .story-nav.prev { left: 10px; }
+  .story-nav.next { right: 10px; }
   .create-fields { display: grid; gap: 10px; margin: 12px 0; }
   .create-fields input, .create-fields textarea {
     width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 12px;
@@ -447,7 +456,6 @@
       <h1>Кружки Алматы</h1>
       <p>Смотри короткие кружки, повторяй задания и записывай свои. Город здесь не как маршрут, а как твоя обычная жизнь: улица, школа, кофе, друзья, район.</p>
       <div class="hero-actions">
-        <button class="primary" onclick="openCreateMission()">Создать задание</button>
         <button class="secondary" onclick="openOnboarding()">Как играть</button>
       </div>
     </div>
@@ -579,7 +587,7 @@
       </div>
       <button class="story-close" onclick="closeStory()">×</button>
     </div>
-    <div class="story-media" id="story-media" onclick="nextStory()"></div>
+    <div class="story-media" id="story-media" onclick="nextStory()" ontouchstart="storyTouchStart(event)" ontouchend="storyTouchEnd(event)"></div>
     <div class="story-actions">
       <button onclick="likeStory()">Нравится</button>
       <button onclick="followStory()">В друзья</button>
@@ -653,6 +661,7 @@ let player = loadPlayer();
 let activeMission = null;
 let stories = [...demoStories];
 let activeStoryIndex = 0;
+let storyTouchX = 0;
 let circleRecorder = null;
 let circleStream = null;
 let circleChunks = [];
@@ -899,6 +908,24 @@ function nextStory() {
   renderStoryViewer();
 }
 
+function prevStory() {
+  if (!stories.length) return;
+  activeStoryIndex = (activeStoryIndex - 1 + stories.length) % stories.length;
+  renderStoryViewer();
+}
+
+function storyTouchStart(event) {
+  storyTouchX = event.changedTouches?.[0]?.clientX || 0;
+}
+
+function storyTouchEnd(event) {
+  const endX = event.changedTouches?.[0]?.clientX || 0;
+  const diff = endX - storyTouchX;
+  if (Math.abs(diff) < 42) return;
+  if (diff < 0) nextStory();
+  else prevStory();
+}
+
 function renderStoryViewer() {
   const story = stories[activeStoryIndex] || demoStories[0];
   document.getElementById('story-user-name').textContent = story.playerName || 'Участник';
@@ -911,12 +938,19 @@ function renderStoryViewer() {
       <span>${escapeHtml(story.missionDesc || story.note || 'Повтори это задание и запиши свой кружок.')}</span>
     </div>`;
   if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
-    media.innerHTML = `<img src="${escapeAttr(story.fileUrl)}" alt="">${task}`;
+    media.innerHTML = `${storyNavButtons()}<img src="${escapeAttr(story.fileUrl)}" alt="">${task}`;
   } else if (story.fileUrl) {
-    media.innerHTML = `<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>${task}`;
+    media.innerHTML = `${storyNavButtons()}<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>${task}`;
   } else {
-    media.innerHTML = `<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>${task}`;
+    media.innerHTML = `${storyNavButtons()}<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>${task}`;
   }
+}
+
+function storyNavButtons() {
+  return `
+    <button class="story-nav prev" onclick="event.stopPropagation(); prevStory()">‹</button>
+    <button class="story-nav next" onclick="event.stopPropagation(); nextStory()">›</button>
+  `;
 }
 
 function likeStory() {
