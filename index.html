@@ -914,8 +914,6 @@ function groupStories(items) {
 
 function storyMediaThumb(story) {
   if (story.playerPhotoUrl) return `<img src="${escapeAttr(story.playerPhotoUrl)}" alt="">`;
-  if (String(story.fileType || '').startsWith('image/')) return `<img src="${escapeAttr(story.fileUrl)}" alt="">`;
-  if (story.fileUrl) return `<video src="${escapeAttr(story.fileUrl)}" muted playsinline></video>`;
   return initials(story.playerName);
 }
 
