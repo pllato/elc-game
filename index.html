@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ELC English Quest</title>
+<title>ELC English Challenges</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
@@ -381,7 +381,7 @@
     align-items: stretch; background: #070B18; color: #fff; z-index: 70; overflow: hidden;
   }
   .story-panel {
-    width: 100%; height: 100vh; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+    width: 100%; min-height: 100svh; display: flex; flex-direction: column;
     padding: 14px; gap: 12px;
   }
   .story-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -392,34 +392,41 @@
   .story-close { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; font-weight: 900; }
   .story-media {
     position: relative; border-radius: 50%; overflow: hidden; background: #111827;
-    width: min(88vw, 540px); aspect-ratio: 1; align-self: center; justify-self: center;
+    width: min(78vw, 360px, 48svh); aspect-ratio: 1; align-self: center;
     min-height: 0; display: grid; place-items: center;
     touch-action: pan-y;
-    box-shadow: 0 22px 60px rgba(0,0,0,.35), 0 0 0 10px rgba(255,255,255,.04);
+    box-shadow: 0 18px 44px rgba(0,0,0,.35), 0 0 0 8px rgba(255,255,255,.04);
   }
   .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
   .story-fallback { color: rgba(255,255,255,.74); font-weight: 800; }
-  .story-task {
-    position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
-    width: min(88%, 430px);
-    background: rgba(7,11,24,.72); border: 1px solid rgba(255,255,255,.14);
+  .story-detail {
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
     border-radius: 8px; padding: 12px; backdrop-filter: blur(12px);
   }
-  .story-task strong { display: block; font-size: 14px; margin-bottom: 4px; }
-  .story-task span { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
+  .story-detail strong { display: block; font-size: 14px; margin-bottom: 4px; }
+  .story-detail span { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.35; }
   .story-inline { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin-top: 9px; }
-  .story-inline button { border: 0; border-radius: 8px; padding: 9px 10px; font-size: 11px; font-weight: 900; background: var(--red); color: #fff; }
+  .story-inline button { border: 0; border-radius: 8px; padding: 9px 10px; font-size: 11px; font-weight: 900; background: var(--red); color: #fff; white-space: nowrap; }
   .story-stats { color: rgba(255,255,255,.76); font-size: 11px; font-weight: 800; }
+  .story-spacer { flex: 1; min-height: 2px; }
+  .practice-thread {
+    margin-top: 10px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 9px;
+    display: grid; gap: 7px;
+  }
+  .practice-reply {
+    background: rgba(255,255,255,.07); border-radius: 8px; padding: 8px;
+    font-size: 11px; color: rgba(255,255,255,.78);
+  }
   .story-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .story-actions button {
-    border: 0; border-radius: 8px; padding: 11px 8px; font-size: 12px; font-weight: 900;
+    border: 0; border-radius: 8px; padding: 10px 6px; font-size: 11px; font-weight: 900;
     background: rgba(255,255,255,.12); color: #fff;
   }
   .story-actions .primary { background: var(--red); }
   .story-count { color: rgba(255,255,255,.56); font-size: 11px; margin-left: 6px; }
   .story-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-    width: 42px; height: 42px; border: 0; border-radius: 50%;
+    width: 34px; height: 34px; border: 0; border-radius: 50%;
     background: rgba(255,255,255,.16); color: #fff; font-size: 24px; font-weight: 900;
     display: grid; place-items: center;
   }
@@ -480,7 +487,7 @@
       <div class="brand-fallback" style="display:none">ELC</div>
     </div>
     <div>
-      <div class="brand-name">ELC <span class="brand-badge">QUEST</span></div>
+      <div class="brand-name">ELC <span class="brand-badge">CHALLENGES</span></div>
       <div class="brand-sub">English Lifestyle Communication · Almaty</div>
     </div>
   </div>
@@ -502,7 +509,7 @@
 
 <section class="auth-gate" id="auth-gate">
   <div class="auth-card">
-    <h1>Вход в ELC Quest</h1>
+    <h1>Вход в ELC English Challenges</h1>
     <p>Укажи имя и телефон, чтобы сохранить прогресс, участвовать в рейтинге и получать сообщения по игре. Фото можно добавить позже в профиле.</p>
     <div class="form-field">
       <label for="signup-name">Имя</label>
@@ -522,7 +529,7 @@
 <main class="app-shell" id="app-shell">
   <section class="screen active" id="screen-missions">
     <div class="hero">
-      <h1>ELC English Quest</h1>
+      <h1>ELC English Challenges</h1>
       <p>Короткая ежедневная практика английского: смотри кружки, выполняй задания, создавай свои темы и собирай XP вместе с участниками Алматы.</p>
       <div class="hero-actions">
         <button class="secondary" onclick="openOnboarding()">Как играть</button>
@@ -535,7 +542,7 @@
       <button class="mini-btn" onclick="shareChallenge()">Пригласить</button>
     </div>
     <div class="challenge-rail" id="challenge-rail"></div>
-    <div class="quick-create">
+    <div class="quick-create" id="quick-create">
       <div>
         <strong>Есть идея для задания?</strong>
         <span>Придумай простую тему, которую другие смогут повторить без долгой поездки.</span>
@@ -553,8 +560,8 @@
 
   <section class="screen" id="screen-rating">
     <div class="hero">
-      <h1>Рейтинг недели</h1>
-      <p>Очки начисляются сразу после публикации кружка. Администратор может скрыть видео, если оно не по теме.</p>
+      <h1>Рейтинги</h1>
+      <p>Отдельно считаем личный XP и помощь другим участникам: подсказки, комментарии и ответы в ветках практики.</p>
     </div>
     <div id="leaderboard"></div>
   </section>
@@ -633,7 +640,7 @@
 <div class="overlay" id="onboarding" onclick="closeOverlay(event, 'onboarding')">
   <div class="sheet">
     <div class="handle"></div>
-    <h2>Как работает ELC Quest</h2>
+    <h2>Как работает ELC English Challenges</h2>
     <p>Это социальная игра коротких English-кружков. Смотри, повторяй, создавай задания и получай XP сразу после публикации.</p>
     <div class="steps">
       <div class="step"><strong>1. Смотри</strong><span>Открой кружок участника или задание дня.</span></div>
@@ -662,10 +669,6 @@
         </div>
       </div>
     </div>
-    <div class="sheet-actions">
-      <button class="secondary" onclick="closeSubmit()">Отмена</button>
-      <button class="primary" id="publish-record-btn" onclick="submitMission()" disabled>Опубликовать</button>
-    </div>
   </div>
 </div>
 
@@ -679,9 +682,11 @@
       <button class="story-close" onclick="closeStory()">×</button>
     </div>
     <div class="story-media" id="story-media" onclick="nextStory()" ontouchstart="storyTouchStart(event)" ontouchend="storyTouchEnd(event)"></div>
+    <div class="story-detail" id="story-detail"></div>
+    <div class="story-spacer"></div>
     <div class="story-actions">
       <button onclick="likeStory()">Лайк</button>
-      <button onclick="commentStory()">Коммент</button>
+      <button onclick="helpStory()">Помочь</button>
       <button onclick="followStory()" id="follow-story-btn">Подписаться</button>
       <button onclick="reportStory()">Жалоба</button>
     </div>
@@ -699,7 +704,7 @@
     </div>
     <div class="sheet-actions">
       <button class="secondary" onclick="document.getElementById('create-mission').classList.remove('open')">Отмена</button>
-      <button class="primary" onclick="publishUserMission()">Опубликовать</button>
+      <button class="primary" onclick="publishUserMission()">Далее: записать пример</button>
     </div>
   </div>
 </div>
@@ -736,12 +741,6 @@ let missions = [
   { id: '10', title: 'Мини-история дня', place: 'Где угодно', xp: 60, level: 'hard', tags: ['История'], check: 'manual', desc: 'Расскажи короткую историю дня: что случилось, что почувствовал, что будет дальше.' }
 ];
 
-const demoLeaders = [
-  { name: 'Бекзат', sub: 'Спикер · 12 заданий', xp: 340 },
-  { name: 'Дана', sub: 'Спикер · 10 заданий', xp: 290 },
-  { name: 'Нурлан', sub: 'Исследователь · 9 заданий', xp: 250 }
-];
-
 const demoStories = [
   { id: 'demo_1', playerName: 'Дана', missionId: '01', missionTitle: 'О себе', missionDesc: 'Расскажи о себе в 30 секунд.', fileUrl: '', likes: 12 },
   { id: 'demo_2', playerName: 'Бекзат', missionId: '02', missionTitle: 'Моя улица', missionDesc: 'Покажи свою улицу и скажи 3 факта.', fileUrl: '', likes: 9 },
@@ -755,10 +754,9 @@ const demoCommunityMissions = [
 ];
 
 const challenges = [
-  { id: 'week', title: '7 дней практики', desc: 'Записывай по одному кружку каждый день неделю.', target: 7, unit: 'дней', xp: 150 },
-  { id: 'month', title: '30 дней английского', desc: 'Месяц ежедневных коротких ответов.', target: 30, unit: 'дней', xp: 700 },
-  { id: 'record', title: 'Личный рекорд XP', desc: 'Попробуй набрать 100 XP за сегодня.', target: 100, unit: 'XP', xp: 120 },
-  { id: 'year', title: 'Годовая привычка', desc: 'Большой путь ELC: возвращайся к практике весь год.', target: 365, unit: 'дней', xp: 5000 }
+  { id: 'streak', title: 'Цепочка практики', desc: '7, 30, 180 и 360 дней. Закрыл этап — переходишь к следующему.', milestones: [7, 30, 180, 360], unit: 'дней', xp: 150 },
+  { id: 'record', title: 'Личный рекорд XP', desc: 'Побей свой лучший день по XP.', target: 100, unit: 'XP', xp: 120 },
+  { id: 'help', title: 'Помощь с практикой', desc: 'Слушай кружки других и помогай советом, комментарием или своим кружком.', target: 10, unit: 'помощи', xp: 180 }
 ];
 
 let state = loadState();
@@ -799,7 +797,10 @@ function normalizeState(value) {
     likedMissions: value?.likedMissions || {},
     following: value?.following || {},
     activeChallenges: value?.activeChallenges || {},
-    badges: Array.isArray(value?.badges) ? value.badges : []
+    badges: Array.isArray(value?.badges) ? value.badges : [],
+    helpXp: Number(value?.helpXp || 0),
+    helpCount: Number(value?.helpCount || 0),
+    practiceReplies: value?.practiceReplies || {}
   };
 }
 function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
@@ -977,6 +978,8 @@ function renderMissions() {
   document.querySelectorAll('.feed-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.feed === activeFeed));
   const historyToggle = document.getElementById('history-toggle');
   if (historyToggle) historyToggle.style.display = activeFeed === 'daily' ? 'block' : 'none';
+  const quickCreate = document.getElementById('quick-create');
+  if (quickCreate) quickCreate.style.display = activeFeed === 'community' ? 'grid' : 'none';
   if (activeFeed === 'community') {
     renderCommunityMissions(list);
     return;
@@ -985,8 +988,8 @@ function renderMissions() {
   const visible = missions.filter((m, index) => {
     if (showDoneHistory) return true;
     const status = state.statuses[m.id] || 'new';
-    if (status !== 'done') return index <= openUntil + 1;
-    return index >= Math.max(0, openUntil - 2) && index <= openUntil;
+    if (status !== 'done') return true;
+    return index === Math.max(0, openUntil - 1);
   });
   if (historyToggle) historyToggle.textContent = showDoneHistory ? 'Скрыть выполненные' : 'Показать выполненные';
   list.className = 'daily-path';
@@ -1131,6 +1134,7 @@ function openStory(groupIndex, itemIndex = 0) {
 function closeStory() {
   document.getElementById('story-viewer').classList.remove('open');
   document.getElementById('story-media').innerHTML = '';
+  document.getElementById('story-detail').innerHTML = '';
 }
 
 function nextStory() {
@@ -1200,21 +1204,25 @@ function renderStoryViewer() {
   const followKey = story.playerId || story.playerName;
   if (followBtn) followBtn.textContent = state.following?.[followKey] ? 'Отписаться' : 'Подписаться';
   const media = document.getElementById('story-media');
-  const task = `
-    <div class="story-task">
+  const detail = document.getElementById('story-detail');
+  detail.innerHTML = `
       <strong>${escapeHtml(story.missionTitle || 'Задание')}</strong>
       <span>${escapeHtml(story.missionDesc || story.note || 'Повтори это задание и запиши свой кружок.')}</span>
       <div class="story-inline">
         <span class="story-stats">♥ ${storyLikes(story)} · ${story.commentsCount || 0} комм.</span>
         <button onclick="event.stopPropagation(); repeatStoryMission()">Записать ответ</button>
       </div>
-    </div>`;
+      <div class="practice-thread">
+        <strong>Ветка помощи</strong>
+        ${practiceThreadHtml(story)}
+      </div>
+  `;
   if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
-    media.innerHTML = `${storyNavButtons()}<img src="${escapeAttr(story.fileUrl)}" alt="">${task}`;
+    media.innerHTML = `${storyNavButtons()}<img src="${escapeAttr(story.fileUrl)}" alt="">`;
   } else if (story.fileUrl) {
-    media.innerHTML = `${storyNavButtons()}<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>${task}`;
+    media.innerHTML = `${storyNavButtons()}<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>`;
   } else {
-    media.innerHTML = `${storyNavButtons()}<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>${task}`;
+    media.innerHTML = `${storyNavButtons()}<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>`;
   }
 }
 
@@ -1250,6 +1258,13 @@ function likeStory() {
   showToast(state.likedStories[story.id] ? 'Лайк поставлен' : 'Лайк снят');
 }
 
+function practiceThreadHtml(story) {
+  const replies = state.practiceReplies?.[story.id] || [
+    { name: 'ELC', text: 'Можно оставить подсказку по произношению или записать кружок с примером.' }
+  ];
+  return replies.map(reply => `<div class="practice-reply"><strong>${escapeHtml(reply.name)}</strong>: ${escapeHtml(reply.text)}</div>`).join('');
+}
+
 function followStory() {
   const story = currentStory();
   if (!story) return;
@@ -1266,13 +1281,20 @@ function storyLikes(story) {
   return Number(story.likes || 0) + (state.likedStories?.[story.id] ? 1 : 0);
 }
 
-function commentStory() {
-  const text = prompt('Комментарий к кружку');
+function helpStory() {
+  const text = prompt('Напиши подсказку по английскому или произношению');
   if (!text?.trim()) return;
   const story = currentStory();
+  state.practiceReplies[story.id] = state.practiceReplies[story.id] || [];
+  state.practiceReplies[story.id].push({ name: player?.name || 'Участник', text: text.trim() });
+  state.helpCount += 1;
+  state.helpXp += 10;
+  state.xp += 10;
   story.commentsCount = Number(story.commentsCount || 0) + 1;
-  showToast('Комментарий добавлен');
+  saveState();
+  showToast('+10 XP за помощь с практикой');
   renderStoryViewer();
+  renderAll();
 }
 
 function reportStory() {
@@ -1329,8 +1351,9 @@ async function publishUserMission() {
   activeFeed = 'community';
   document.getElementById('create-mission').classList.remove('open');
   renderAll();
-  showToast('Задание добавлено в ленту участников на 24 часа');
+  showToast('Теперь запиши пример для задания');
   await saveCommunityMission(mission);
+  setTimeout(() => openSubmit({ stopPropagation() {} }, mission.id), 120);
 }
 
 async function saveCommunityMission(mission) {
@@ -1403,16 +1426,24 @@ function escapeAttr(value) {
 }
 function renderLeaderboard() {
   const list = document.getElementById('leaderboard');
-  const me = { name: `Ты · ${player?.name || 'Гость'}`, sub: `${levelByXP(state.xp).name} · ${Object.keys(state.statuses).length} заданий`, xp: state.xp, me: true };
-  const leaders = [...demoLeaders, me].sort((a, b) => b.xp - a.xp);
-  list.innerHTML = leaders.map((p, i) => `
+  const me = { name: player?.name || 'Гость', sub: `${levelByXP(state.xp).name} · ${Object.keys(state.statuses).length} заданий`, xp: state.xp, helpXp: state.helpXp || 0, me: true };
+  list.innerHTML = `
+    <div class="section-title">Личный XP</div>
+    ${leaderRow(me, 1, me.xp, 'XP')}
+    <div class="section-title">Рейтинг помощи</div>
+    ${leaderRow({ ...me, sub: `${state.helpCount || 0} подсказок и ответов` }, 1, me.helpXp, 'XP помощи')}
+  `;
+}
+
+function leaderRow(p, rank, value, label) {
+  return `
     <div class="leader-item ${p.me ? 'me' : ''}">
-      <div class="rank">${i + 1}</div>
+      <div class="rank">${rank}</div>
       <div class="leader-avatar">${p.me && player?.photoUrl ? `<img src="${player.photoUrl}" alt="">` : initials(p.name.replace('Ты · ', ''))}</div>
-      <div class="leader-copy"><div class="leader-name">${p.name}</div><div class="leader-sub">${p.sub}</div></div>
-      <div class="leader-xp">${p.xp} XP</div>
+      <div class="leader-copy"><div class="leader-name">${p.me ? `Ты · ${escapeHtml(p.name)}` : escapeHtml(p.name)}</div><div class="leader-sub">${escapeHtml(p.sub)}</div></div>
+      <div class="leader-xp">${value} ${label}</div>
     </div>
-  `).join('');
+  `;
 }
 
 function renderChallenges() {
@@ -1421,13 +1452,14 @@ function renderChallenges() {
   root.innerHTML = challenges.map(challenge => {
     const accepted = state.activeChallenges[challenge.id];
     const progress = challengeProgress(challenge);
-    const pct = Math.min(100, Math.round((progress / challenge.target) * 100));
+    const target = challengeTarget(challenge);
+    const pct = Math.min(100, Math.round((progress / target) * 100));
     return `
       <article class="challenge-card">
         <strong>${escapeHtml(challenge.title)}</strong>
         <p>${escapeHtml(challenge.desc)}</p>
         <div class="challenge-progress"><span style="width:${pct}%"></span></div>
-        <p>${progress}/${challenge.target} ${challenge.unit} · +${challenge.xp} XP</p>
+        <p>${progress}/${target} ${challenge.unit} · +${challenge.xp} XP</p>
         <button class="${accepted ? 'secondary' : 'primary'}" onclick="acceptChallenge('${challenge.id}')">${accepted ? 'Активен' : 'Принять челлендж'}</button>
       </article>
     `;
@@ -1437,7 +1469,14 @@ function renderChallenges() {
 
 function challengeProgress(challenge) {
   if (challenge.id === 'record') return Math.min(challenge.target, state.xp % 100);
-  return Math.min(challenge.target, Object.values(state.statuses).filter(s => s === 'done').length);
+  if (challenge.id === 'help') return Math.min(challenge.target, state.helpCount || 0);
+  return Math.min(challengeTarget(challenge), Object.values(state.statuses).filter(s => s === 'done').length);
+}
+
+function challengeTarget(challenge) {
+  if (!challenge.milestones) return challenge.target;
+  const done = Object.values(state.statuses).filter(s => s === 'done').length;
+  return challenge.milestones.find(step => done < step) || challenge.milestones[challenge.milestones.length - 1];
 }
 
 function acceptChallenge(id) {
@@ -1450,7 +1489,7 @@ function acceptChallenge(id) {
 }
 
 function shareChallenge() {
-  const text = `Прими челлендж в ELC English Quest: ${APP_URL}`;
+  const text = `Прими челлендж в ELC English Challenges: ${APP_URL}`;
   if (navigator.share) navigator.share({ text, url: APP_URL }).catch(() => {});
   else {
     navigator.clipboard?.writeText(text);
@@ -1502,7 +1541,7 @@ function renderProfileChallenges() {
   root.innerHTML = active.map(challenge => `
     <div class="simple-item">
       <strong>${escapeHtml(challenge.title)}</strong>
-      <span>${challengeProgress(challenge)}/${challenge.target} ${challenge.unit}</span>
+      <span>${challengeProgress(challenge)}/${challengeTarget(challenge)} ${challenge.unit}</span>
     </div>
   `).join('') || '<div class="notice">Прими челлендж на главной, и он появится здесь.</div>';
 }
@@ -1624,7 +1663,6 @@ async function toggleCircleRecording() {
     updateRecordTimer();
     document.getElementById('record-btn').textContent = 'Остановить';
     document.getElementById('record-btn').classList.add('recording');
-    document.getElementById('publish-record-btn').disabled = true;
     document.getElementById('rerecord-btn').style.display = 'none';
     document.getElementById('record-dot').classList.add('live');
     document.getElementById('record-status').textContent = 'Идёт запись. Максимум 30 секунд.';
@@ -1668,7 +1706,6 @@ async function handleCircleRecordingStop() {
   document.getElementById('record-btn').classList.add('ready');
   document.getElementById('record-btn').onclick = submitMission;
   document.getElementById('rerecord-btn').style.display = 'inline-flex';
-  document.getElementById('publish-record-btn').disabled = false;
   document.getElementById('record-dot').classList.remove('live');
   document.getElementById('record-status').textContent = 'Кружок готов. Опубликуй или пересними.';
 }
@@ -1698,8 +1735,6 @@ function resetCircleRecording() {
   }
   const rerecord = document.getElementById('rerecord-btn');
   if (rerecord) rerecord.style.display = 'none';
-  const publish = document.getElementById('publish-record-btn');
-  if (publish) publish.disabled = true;
   const progress = document.getElementById('record-progress');
   if (progress) progress.style.width = '0%';
   document.getElementById('record-dot')?.classList.remove('live');
@@ -1754,7 +1789,6 @@ async function submitMission(options = {}) {
     showToast('Сначала запиши кружок');
     return;
   }
-  document.getElementById('publish-record-btn').disabled = true;
   document.getElementById('record-status').textContent = 'Загружаем и публикуем...';
   const submission = {
     id: `s_${Date.now()}`,
@@ -1876,7 +1910,7 @@ function referralLink() {
   return `${APP_URL}?ref=${encodeURIComponent(player?.refCode || 'guest')}`;
 }
 function shareReferral() {
-  const text = `Привет! Я играю в ELC English Quest. Заходи: ${referralLink()}`;
+  const text = `Привет! Я играю в ELC English Challenges. Заходи: ${referralLink()}`;
   const smsUrl = `sms:?&body=${encodeURIComponent(text)}`;
   window.location.href = smsUrl;
 }
