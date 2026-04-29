@@ -271,10 +271,12 @@ async function setStatus(id, status) {
 
 async function publishStory(submission) {
   if (!submission.fileUrl) throw new Error('нет файла');
+  const player = players.get(submission.playerId) || {};
   await db.collection('stories').doc(submission.id).set({
     submissionId: submission.id,
     playerId: submission.playerId || '',
     playerName: submission.playerName || 'Участник',
+    playerPhotoUrl: player.photoUrl || '',
     missionId: submission.missionId || '',
     missionTitle: submission.missionTitle || 'Задание',
     missionDesc: submission.missionDesc || submission.note || '',
@@ -284,6 +286,7 @@ async function publishStory(submission) {
     fileType: submission.fileType || '',
     filePublicId: submission.filePublicId || '',
     likes: 0,
+    moderationStatus: 'active',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true });
 }
@@ -358,6 +361,28 @@ async function publishApprovedStory(id) {
   showToast(result.ok ? 'Сторис опубликована' : `Сторис не создана: ${result.message}`);
 }
 
+async function blockStory(id, reason) {
+  try {
+    await db.collection('stories').doc(id).set({
+      moderationStatus: 'blocked',
+      blockedReason: reason,
+      blockedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      blockedBy: auth.currentUser?.email || ''
+    }, { merge: true });
+    await db.collection('submissions').doc(id).update({
+      moderationStatus: 'blocked',
+      blockedReason: reason,
+      reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      reviewedBy: auth.currentUser?.email || ''
+    });
+    showToast('Сторис скрыта из ленты');
+    await loadSubmissions();
+  } catch (error) {
+    console.error(error);
+    showToast('Не получилось скрыть сторис');
+  }
+}
+
 function renderSubmissions() {
   const query = document.getElementById('search').value.trim().toLowerCase();
   const status = document.getElementById('status-filter').value;
@@ -395,10 +420,15 @@ function renderSubmissions() {
     const storyButton = item.fileUrl
       ? `<button class="secondary" onclick="publishApprovedStory('${item.id}')">В сторис</button>`
       : '';
+    const blockButtons = item.status === 'approved'
+      ? `<button class="danger" onclick="blockStory('${item.id}', 'Не соответствует академической направленности')">Не академично</button>
+         <button class="danger" onclick="blockStory('${item.id}', 'Контент не соответствует теме урока')">Не по теме</button>
+         <button class="danger" onclick="blockStory('${item.id}', 'Неуместный контент')">Неуместно</button>`
+      : '';
     const actions = item.status === 'pending'
       ? `<button class="success" onclick="setStatus('${item.id}', 'approved')">Зачесть +${Number(item.xp || 0)} XP</button>
          <button class="danger" onclick="setStatus('${item.id}', 'rejected')">Отклонить</button>`
-      : `<span class="small">Проверил: ${escapeHtml(item.reviewedBy || 'админ')}</span>${item.status === 'approved' ? storyButton : ''}`;
+      : `<span class="small">Проверил: ${escapeHtml(item.reviewedBy || 'автоматически')}</span>${item.status === 'approved' ? storyButton + blockButtons : ''}`;
     return `
       <article class="submission">
         <div class="submission-head">

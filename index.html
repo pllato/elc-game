@@ -102,6 +102,7 @@
     border: 0; border-radius: 8px; padding: 11px 10px; font-weight: 800; font-size: 12px;
   }
   .primary { background: var(--red); color: #fff; }
+  .primary:disabled { background: #9AA7CC; cursor: default; }
   .secondary { background: #E9EEFF; color: var(--blue); }
   .section-title {
     margin: 14px 2px 9px; color: var(--muted); text-transform: uppercase;
@@ -303,33 +304,44 @@
   }
   .record-card {
     background: #fff; border: 1px solid var(--border); border-radius: 8px;
-    padding: 12px; margin-bottom: 10px; display: grid; grid-template-columns: 76px 1fr;
-    gap: 12px; align-items: center;
+    padding: 14px; margin-bottom: 10px; display: grid; justify-items: center;
+    gap: 12px; text-align: center;
   }
   .circle-preview {
-    width: 76px; height: 76px; border-radius: 50%; overflow: hidden;
+    width: 164px; height: 164px; border-radius: 50%; overflow: hidden;
     background: #E9EEFF; border: 3px solid #DDE5FF; display: grid; place-items: center;
-    color: var(--blue); font-weight: 900; font-size: 11px; text-align: center;
+    color: var(--blue); font-weight: 900; font-size: 13px; text-align: center;
+    box-shadow: inset 0 0 0 8px rgba(255,255,255,.8), 0 12px 32px rgba(43,78,174,.18);
   }
   .circle-preview video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
   .record-copy strong { display: block; font-size: 13px; margin-bottom: 4px; }
   .record-copy span { display: block; color: var(--muted); font-size: 11px; line-height: 1.4; margin-bottom: 8px; }
-  .record-row { display: flex; gap: 8px; align-items: center; }
+  .record-row { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
   .record-btn {
     border: 0; border-radius: 999px; background: var(--red); color: #fff;
     padding: 10px 12px; font-size: 12px; font-weight: 900;
   }
   .record-btn.recording { background: #101B3D; }
+  .record-btn.ready { background: var(--green); }
+  .record-btn.secondary-action { background: #E9EEFF; color: var(--blue); }
   .record-dot {
     width: 9px; height: 9px; border-radius: 50%; background: #CBD5E1;
   }
   .record-dot.live { background: var(--red); animation: pulse 1s infinite; }
+  .record-timer {
+    width: 100%; max-width: 240px; height: 8px; border-radius: 999px;
+    background: #E9EEFF; overflow: hidden; margin: 4px auto 0;
+  }
+  .record-timer span {
+    display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--green), var(--red));
+    border-radius: inherit; transition: width .2s linear;
+  }
   @keyframes pulse { 50% { opacity: .35; transform: scale(.8); } }
   .story-viewer {
-    align-items: stretch; background: #070B18; color: #fff; z-index: 70;
+    align-items: stretch; background: #070B18; color: #fff; z-index: 70; overflow: hidden;
   }
   .story-panel {
-    width: 100%; min-height: 100vh; display: grid; grid-template-rows: auto 1fr auto;
+    width: 100%; height: 100vh; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
     padding: 14px; gap: 12px;
   }
   .story-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -340,7 +352,7 @@
   .story-close { border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%; width: 36px; height: 36px; font-weight: 900; }
   .story-media {
     position: relative; border-radius: 18px; overflow: hidden; background: #111827;
-    min-height: 420px; display: grid; place-items: center;
+    min-height: 0; height: 100%; display: grid; place-items: center;
     touch-action: pan-y;
   }
   .story-media video, .story-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -358,6 +370,7 @@
     background: rgba(255,255,255,.12); color: #fff;
   }
   .story-actions .primary { background: var(--red); }
+  .story-count { color: rgba(255,255,255,.56); font-size: 11px; margin-left: 6px; }
   .story-nav {
     position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
     width: 42px; height: 42px; border: 0; border-radius: 50%;
@@ -475,7 +488,7 @@
   <section class="screen" id="screen-rating">
     <div class="hero">
       <h1>Рейтинг недели</h1>
-      <p>Очки начисляются после автозачёта или проверки администратором. Победитель недели получает бонус от ELC.</p>
+      <p>Очки начисляются сразу после публикации кружка. Администратор может скрыть видео, если оно не по теме.</p>
     </div>
     <div id="leaderboard"></div>
   </section>
@@ -490,7 +503,7 @@
     <div class="stats">
       <div class="stat"><strong id="stat-xp">0</strong><span>XP</span></div>
       <div class="stat"><strong id="stat-done">0</strong><span>Готово</span></div>
-      <div class="stat"><strong id="stat-pending">0</strong><span>Проверка</span></div>
+      <div class="stat"><strong id="stat-pending">0</strong><span>Скрыто</span></div>
       <div class="stat"><strong id="stat-ref">0</strong><span>Друзей</span></div>
     </div>
 
@@ -539,11 +552,11 @@
   <div class="sheet">
     <div class="handle"></div>
     <h2>Как работает ELC Quest</h2>
-    <p>Это социальная игра коротких English-кружков. Смотри, повторяй, создавай задания и получай XP после проверки администратора.</p>
+    <p>Это социальная игра коротких English-кружков. Смотри, повторяй, создавай задания и получай XP сразу после публикации.</p>
     <div class="steps">
       <div class="step"><strong>1. Смотри</strong><span>Открой кружок участника или задание дня.</span></div>
       <div class="step"><strong>2. Повтори</strong><span>Расскажи о себе, улице, школе, еде или городе.</span></div>
-      <div class="step"><strong>3. Запиши</strong><span>Кружок уйдёт на проверку и появится в ленте после зачёта.</span></div>
+      <div class="step"><strong>3. Запиши</strong><span>Кружок появится в ленте, а админ сможет скрыть его при необходимости.</span></div>
     </div>
     <button class="primary" style="width:100%" onclick="finishOnboarding()">Начать игру</button>
   </div>
@@ -553,27 +566,23 @@
   <div class="sheet">
     <div class="handle"></div>
     <h2 id="submit-title">Задание</h2>
-    <p id="submit-copy">Нажми запись, скажи 20-40 секунд на английском и останови. Видео сразу уйдёт на проверку.</p>
+    <p id="submit-copy">Нажми запись, скажи до 30 секунд на английском, останови и опубликуй кружок.</p>
     <div class="record-card">
       <div class="circle-preview" id="circle-preview">Кружок</div>
       <div class="record-copy">
-        <strong>Главное действие</strong>
-        <span id="record-status">Короткое видео с камеры сразу уйдёт на проверку после остановки.</span>
+        <strong>Запиши кружок</strong>
+        <span id="record-status">Максимум 30 секунд. После остановки можно переснять или опубликовать.</span>
+        <div class="record-timer"><span id="record-progress"></span></div>
         <div class="record-row">
           <button class="record-btn" id="record-btn" onclick="toggleCircleRecording()">Начать запись</button>
+          <button class="record-btn secondary-action" id="rerecord-btn" onclick="rerecordCircle()" style="display:none">Перезаписать</button>
           <span class="record-dot" id="record-dot"></span>
         </div>
       </div>
     </div>
-    <textarea class="input-area" id="submit-note" placeholder="Комментарий необязателен"></textarea>
-    <div class="upload-card">
-      <button class="upload-btn" onclick="document.getElementById('submit-file').click()">Прикрепить готовое видео</button>
-      <input class="upload-file" type="file" id="submit-file" accept="image/*,video/*" onchange="updateFileName()">
-      <div class="upload-name" id="upload-name">Файл пока не выбран</div>
-    </div>
     <div class="sheet-actions">
       <button class="secondary" onclick="closeSubmit()">Отмена</button>
-      <button class="primary" onclick="submitMission()">Отправить</button>
+      <button class="primary" id="publish-record-btn" onclick="submitMission()" disabled>Опубликовать</button>
     </div>
   </div>
 </div>
@@ -660,13 +669,18 @@ let state = loadState();
 let player = loadPlayer();
 let activeMission = null;
 let stories = [...demoStories];
-let activeStoryIndex = 0;
+let storyGroups = [];
+let activeStoryGroupIndex = 0;
+let activeStoryItemIndex = 0;
 let storyTouchX = 0;
 let circleRecorder = null;
 let circleStream = null;
 let circleChunks = [];
 let recordedMissionFile = null;
 let circleDiscardStop = false;
+let recordTimerId = null;
+let recordStartedAt = 0;
+const RECORD_LIMIT_SECONDS = 30;
 
 function loadState() {
   try {
@@ -876,23 +890,38 @@ function renderMissions() {
 function renderStories() {
   const rail = document.getElementById('stories-rail');
   if (!rail) return;
-  const data = stories.length ? stories : demoStories;
-  rail.innerHTML = data.map((story, index) => `
+  storyGroups = groupStories(stories.length ? stories : demoStories);
+  rail.innerHTML = storyGroups.map((group, index) => `
     <button class="story-bubble" onclick="openStory(${index})">
-      <span class="story-ring"><span class="story-avatar">${story.fileUrl ? storyMediaThumb(story) : initials(story.playerName)}</span></span>
-      <span class="story-label">${escapeHtml(story.playerName || 'ELC')}</span>
+      <span class="story-ring"><span class="story-avatar">${storyMediaThumb(group.items[0])}</span></span>
+      <span class="story-label">${escapeHtml(group.playerName || 'ELC')} · ${group.items.length}</span>
     </button>
   `).join('');
+  preloadStoryMedia();
+}
+
+function groupStories(items) {
+  const map = new Map();
+  items.forEach(story => {
+    const key = story.playerId || story.playerName || 'guest';
+    if (!map.has(key)) map.set(key, { playerId: story.playerId || key, playerName: story.playerName || 'Участник', playerPhotoUrl: story.playerPhotoUrl || '', items: [] });
+    const group = map.get(key);
+    if (!group.playerPhotoUrl && story.playerPhotoUrl) group.playerPhotoUrl = story.playerPhotoUrl;
+    group.items.push(story);
+  });
+  return [...map.values()];
 }
 
 function storyMediaThumb(story) {
+  if (story.playerPhotoUrl) return `<img src="${escapeAttr(story.playerPhotoUrl)}" alt="">`;
   if (String(story.fileType || '').startsWith('image/')) return `<img src="${escapeAttr(story.fileUrl)}" alt="">`;
   if (story.fileUrl) return `<video src="${escapeAttr(story.fileUrl)}" muted playsinline></video>`;
   return initials(story.playerName);
 }
 
-function openStory(index) {
-  activeStoryIndex = index;
+function openStory(groupIndex, itemIndex = 0) {
+  activeStoryGroupIndex = groupIndex;
+  activeStoryItemIndex = itemIndex;
   renderStoryViewer();
   document.getElementById('story-viewer').classList.add('open');
 }
@@ -903,15 +932,41 @@ function closeStory() {
 }
 
 function nextStory() {
-  if (!stories.length) return;
-  activeStoryIndex = (activeStoryIndex + 1) % stories.length;
+  const group = currentStoryGroup();
+  if (!group) return;
+  if (activeStoryItemIndex < group.items.length - 1) activeStoryItemIndex += 1;
+  else nextStoryGroup();
   renderStoryViewer();
 }
 
 function prevStory() {
-  if (!stories.length) return;
-  activeStoryIndex = (activeStoryIndex - 1 + stories.length) % stories.length;
+  const group = currentStoryGroup();
+  if (!group) return;
+  if (activeStoryItemIndex > 0) activeStoryItemIndex -= 1;
+  else prevStoryGroup(true);
   renderStoryViewer();
+}
+
+function nextStoryGroup() {
+  if (!storyGroups.length) return;
+  activeStoryGroupIndex = (activeStoryGroupIndex + 1) % storyGroups.length;
+  activeStoryItemIndex = 0;
+}
+
+function prevStoryGroup(goLast = false) {
+  if (!storyGroups.length) return;
+  activeStoryGroupIndex = (activeStoryGroupIndex - 1 + storyGroups.length) % storyGroups.length;
+  activeStoryItemIndex = goLast ? currentStoryGroup().items.length - 1 : 0;
+}
+
+function currentStoryGroup() {
+  if (!storyGroups.length) storyGroups = groupStories(stories.length ? stories : demoStories);
+  return storyGroups[activeStoryGroupIndex];
+}
+
+function currentStory() {
+  const group = currentStoryGroup();
+  return group?.items[activeStoryItemIndex] || demoStories[0];
 }
 
 function storyTouchStart(event) {
@@ -922,15 +977,23 @@ function storyTouchEnd(event) {
   const endX = event.changedTouches?.[0]?.clientX || 0;
   const diff = endX - storyTouchX;
   if (Math.abs(diff) < 42) return;
-  if (diff < 0) nextStory();
-  else prevStory();
+  if (diff < 0) {
+    nextStoryGroup();
+    renderStoryViewer();
+  } else {
+    prevStoryGroup();
+    renderStoryViewer();
+  }
 }
 
 function renderStoryViewer() {
-  const story = stories[activeStoryIndex] || demoStories[0];
-  document.getElementById('story-user-name').textContent = story.playerName || 'Участник';
-  document.getElementById('story-user-meta').textContent = story.missionTitle || 'Задание';
-  document.getElementById('story-user-avatar').textContent = initials(story.playerName);
+  const group = currentStoryGroup();
+  const story = currentStory();
+  document.getElementById('story-user-name').textContent = group?.playerName || story.playerName || 'Участник';
+  document.getElementById('story-user-meta').innerHTML = `${escapeHtml(story.missionTitle || 'Задание')} <span class="story-count">${activeStoryItemIndex + 1}/${group?.items.length || 1}</span>`;
+  const avatar = document.getElementById('story-user-avatar');
+  if (group?.playerPhotoUrl) avatar.innerHTML = `<img src="${escapeAttr(group.playerPhotoUrl)}" alt="">`;
+  else avatar.textContent = initials(group?.playerName || story.playerName);
   const media = document.getElementById('story-media');
   const task = `
     <div class="story-task">
@@ -948,13 +1011,28 @@ function renderStoryViewer() {
 
 function storyNavButtons() {
   return `
-    <button class="story-nav prev" onclick="event.stopPropagation(); prevStory()">‹</button>
-    <button class="story-nav next" onclick="event.stopPropagation(); nextStory()">›</button>
+    <button class="story-nav prev" onclick="event.stopPropagation(); prevStoryGroup(); renderStoryViewer()">‹</button>
+    <button class="story-nav next" onclick="event.stopPropagation(); nextStoryGroup(); renderStoryViewer()">›</button>
   `;
 }
 
+function preloadStoryMedia() {
+  const flat = storyGroups.flatMap(group => group.items).slice(0, 12);
+  flat.forEach(story => {
+    if (!story.fileUrl) return;
+    if (String(story.fileType || '').startsWith('image/')) {
+      const img = new Image();
+      img.src = story.fileUrl;
+      return;
+    }
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = story.fileUrl;
+  });
+}
+
 function likeStory() {
-  const story = stories[activeStoryIndex];
+  const story = currentStory();
   if (!story) return;
   const key = `liked_${story.id}`;
   localStorage.setItem(key, '1');
@@ -962,13 +1040,13 @@ function likeStory() {
 }
 
 function followStory() {
-  const story = stories[activeStoryIndex];
+  const story = currentStory();
   if (!story) return;
   showToast(`${story.playerName || 'Участник'} добавлен в друзья`);
 }
 
 function repeatStoryMission() {
-  const story = stories[activeStoryIndex] || {};
+  const story = currentStory() || {};
   const mission = missions.find(item => item.id === story.missionId) || {
     id: story.missionId || `story_${Date.now()}`,
     title: story.missionTitle || 'Повтори задание',
@@ -1035,8 +1113,11 @@ async function loadStoriesFromFirebase() {
   const services = await ensureFirebase();
   if (!services) return;
   try {
-    const snap = await services.db.collection('stories').orderBy('createdAt', 'desc').limit(30).get();
-    const loaded = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snap = await services.db.collection('stories').orderBy('createdAt', 'desc').limit(80).get();
+    const loaded = snap.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(story => (story.moderationStatus || 'active') === 'active')
+      .slice(0, 60);
     stories = loaded.length ? loaded : [...demoStories];
     renderStories();
   } catch (error) {
@@ -1100,22 +1181,13 @@ function openSubmit(event, id) {
   resetCircleRecording();
   activeMission = missions.find(m => m.id === id);
   document.getElementById('submit-title').textContent = activeMission.title;
-  document.getElementById('submit-copy').textContent = `${activeMission.place}. Проверка: ${activeMission.check === 'auto' ? 'лёгкое задание можно засчитать автоматически' : 'администратор ELC проверит выполнение вручную'}.`;
-  document.getElementById('submit-note').value = '';
-  document.getElementById('submit-file').value = '';
-  document.getElementById('upload-name').textContent = 'Файл пока не выбран';
+  document.getElementById('submit-copy').textContent = `${activeMission.place}. Кружок автоматически появится в ленте, а админ сможет скрыть его, если он не по теме.`;
   document.getElementById('submit').classList.add('open');
 }
 function closeSubmit() {
   cancelCircleRecording();
   document.getElementById('submit').classList.remove('open');
 }
-function updateFileName() {
-  const input = document.getElementById('submit-file');
-  recordedMissionFile = null;
-  document.getElementById('upload-name').textContent = input.files.length ? input.files[0].name : 'Файл пока не выбран';
-}
-
 function bestRecorderMimeType() {
   if (!window.MediaRecorder) return '';
   const types = [
@@ -1128,7 +1200,7 @@ function bestRecorderMimeType() {
 
 async function toggleCircleRecording() {
   if (circleRecorder && circleRecorder.state === 'recording') {
-    document.getElementById('record-status').textContent = 'Готовим видео и отправляем на проверку...';
+    document.getElementById('record-status').textContent = 'Кружок готов. Можно опубликовать или переснять.';
     circleRecorder.stop();
     return;
   }
@@ -1140,23 +1212,32 @@ async function toggleCircleRecording() {
     recordedMissionFile = null;
     circleChunks = [];
     circleStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user' },
+      video: { facingMode: 'user', width: { ideal: 480 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 } },
       audio: true
     });
     const preview = document.getElementById('circle-preview');
     preview.innerHTML = '<video id="circle-video" autoplay muted playsinline></video>';
     document.getElementById('circle-video').srcObject = circleStream;
     const mimeType = bestRecorderMimeType();
-    circleRecorder = new MediaRecorder(circleStream, mimeType ? { mimeType } : undefined);
+    circleRecorder = new MediaRecorder(circleStream, {
+      ...(mimeType ? { mimeType } : {}),
+      videoBitsPerSecond: 800000,
+      audioBitsPerSecond: 64000
+    });
     circleRecorder.ondataavailable = event => {
       if (event.data?.size) circleChunks.push(event.data);
     };
     circleRecorder.onstop = handleCircleRecordingStop;
     circleRecorder.start();
-    document.getElementById('record-btn').textContent = 'Остановить и отправить';
+    recordStartedAt = Date.now();
+    recordTimerId = setInterval(updateRecordTimer, 200);
+    updateRecordTimer();
+    document.getElementById('record-btn').textContent = 'Остановить';
     document.getElementById('record-btn').classList.add('recording');
+    document.getElementById('publish-record-btn').disabled = true;
+    document.getElementById('rerecord-btn').style.display = 'none';
     document.getElementById('record-dot').classList.add('live');
-    document.getElementById('record-status').textContent = 'Идёт запись. Нажми стоп, и видео сразу уйдёт админу.';
+    document.getElementById('record-status').textContent = 'Идёт запись. Максимум 30 секунд.';
     showToast('Запись началась');
   } catch (error) {
     console.warn('Circle recording failed', error);
@@ -1165,7 +1246,21 @@ async function toggleCircleRecording() {
   }
 }
 
+function updateRecordTimer() {
+  const elapsed = Math.min(RECORD_LIMIT_SECONDS, (Date.now() - recordStartedAt) / 1000);
+  const left = Math.max(0, Math.ceil(RECORD_LIMIT_SECONDS - elapsed));
+  const progress = document.getElementById('record-progress');
+  if (progress) progress.style.width = `${(elapsed / RECORD_LIMIT_SECONDS) * 100}%`;
+  const status = document.getElementById('record-status');
+  if (status && circleRecorder?.state === 'recording') status.textContent = `Идёт запись. Осталось ${left} сек.`;
+  if (elapsed >= RECORD_LIMIT_SECONDS && circleRecorder?.state === 'recording') {
+    circleRecorder.stop();
+  }
+}
+
 async function handleCircleRecordingStop() {
+  clearInterval(recordTimerId);
+  recordTimerId = null;
   if (circleDiscardStop) {
     circleDiscardStop = false;
     stopCircleStream();
@@ -1176,12 +1271,16 @@ async function handleCircleRecordingStop() {
   const blob = new Blob(circleChunks, { type: mimeType });
   recordedMissionFile = new File([blob], `elc-circle-${Date.now()}.${ext}`, { type: mimeType });
   stopCircleStream();
-  document.getElementById('record-btn').textContent = 'Начать запись';
+  const preview = document.getElementById('circle-preview');
+  preview.innerHTML = `<video src="${URL.createObjectURL(recordedMissionFile)}" controls playsinline></video>`;
+  document.getElementById('record-btn').textContent = 'Опубликовать';
   document.getElementById('record-btn').classList.remove('recording');
+  document.getElementById('record-btn').classList.add('ready');
+  document.getElementById('record-btn').onclick = submitMission;
+  document.getElementById('rerecord-btn').style.display = 'inline-flex';
+  document.getElementById('publish-record-btn').disabled = false;
   document.getElementById('record-dot').classList.remove('live');
-  document.getElementById('upload-name').textContent = recordedMissionFile.name;
-  document.getElementById('record-status').textContent = 'Кружок записан. Отправляем...';
-  await submitMission({ autoRecorded: true });
+  document.getElementById('record-status').textContent = 'Кружок готов. Опубликуй или пересними.';
 }
 
 function stopCircleStream() {
@@ -1193,6 +1292,8 @@ function stopCircleStream() {
 
 function resetCircleRecording() {
   cancelCircleRecording();
+  clearInterval(recordTimerId);
+  recordTimerId = null;
   circleRecorder = null;
   circleChunks = [];
   recordedMissionFile = null;
@@ -1202,10 +1303,23 @@ function resetCircleRecording() {
   if (btn) {
     btn.textContent = 'Начать запись';
     btn.classList.remove('recording');
+    btn.classList.remove('ready');
+    btn.onclick = toggleCircleRecording;
   }
+  const rerecord = document.getElementById('rerecord-btn');
+  if (rerecord) rerecord.style.display = 'none';
+  const publish = document.getElementById('publish-record-btn');
+  if (publish) publish.disabled = true;
+  const progress = document.getElementById('record-progress');
+  if (progress) progress.style.width = '0%';
   document.getElementById('record-dot')?.classList.remove('live');
   const status = document.getElementById('record-status');
-  if (status) status.textContent = 'Короткое видео с камеры сразу уйдёт на проверку после остановки.';
+  if (status) status.textContent = 'Максимум 30 секунд. После остановки можно переснять или опубликовать.';
+}
+
+function rerecordCircle() {
+  resetCircleRecording();
+  toggleCircleRecording();
 }
 
 function cancelCircleRecording() {
@@ -1245,9 +1359,13 @@ async function updateProfilePhoto(input) {
 
 async function submitMission(options = {}) {
   if (!activeMission || !isAuthorized()) return;
-  const fileInput = document.getElementById('submit-file');
-  const note = document.getElementById('submit-note').value.trim();
-  const file = recordedMissionFile || fileInput.files[0];
+  const file = recordedMissionFile;
+  if (!file) {
+    showToast('Сначала запиши кружок');
+    return;
+  }
+  document.getElementById('publish-record-btn').disabled = true;
+  document.getElementById('record-status').textContent = 'Загружаем и публикуем...';
   const submission = {
     id: `s_${Date.now()}`,
     action: 'mission_submit',
@@ -1259,20 +1377,24 @@ async function submitMission(options = {}) {
     missionTitle: activeMission.title,
     missionDesc: activeMission.desc || '',
     xp: activeMission.xp,
-    note: note || (options.autoRecorded ? 'Кружок записан на сайте и отправлен автоматически.' : ''),
+    note: 'Кружок записан на сайте и опубликован автоматически.',
     fileName: file?.name || '',
     fileType: file?.type || '',
-    status: 'pending',
+    status: 'approved',
+    moderationStatus: 'active',
     createdAt: new Date().toISOString()
   };
-  state.statuses[activeMission.id] = 'pending';
+  const wasDone = state.statuses[activeMission.id] === 'done';
+  state.statuses[activeMission.id] = 'done';
+  if (!wasDone) state.xp += Number(activeMission.xp || 0);
   state.submissions = [...(state.submissions || []), submission];
   saveState();
-  if (file) showToast('Загружаем файл...');
+  showToast('Загружаем кружок...');
   await saveSubmissionToFirebase(submission, file);
   closeSubmit();
+  await loadStoriesFromFirebase();
   renderAll();
-  showToast(hasFirebaseConfig() ? 'Заявка отправлена на проверку' : 'Заявка сохранена на устройстве');
+  showToast(hasFirebaseConfig() ? 'Кружок опубликован в ленте' : 'Кружок сохранён на устройстве');
   recordedMissionFile = null;
 }
 
@@ -1298,9 +1420,35 @@ async function saveSubmissionToFirebase(submission, file) {
     fileUrl,
     filePublicId,
     fileUploadStatus,
-    status: 'pending',
+    status: 'approved',
+    moderationStatus: 'active',
     createdAt: firebase.firestore.FieldValue.serverTimestamp()
   });
+  if (fileUrl) {
+    await services.db.collection('stories').doc(submission.id).set({
+      submissionId: submission.id,
+      playerId: player.id,
+      playerName: player.name,
+      playerPhotoUrl: player.photoUrl || '',
+      missionId: activeMission.id,
+      missionTitle: activeMission.title,
+      missionDesc: activeMission.desc || '',
+      note: submission.note || '',
+      xp: Number(activeMission.xp || 0),
+      fileUrl,
+      fileType: file?.type || '',
+      filePublicId,
+      likes: 0,
+      moderationStatus: 'active',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+  await services.db.collection('players').doc(player.id).set({
+    xp: state.xp,
+    approvedCount: Object.values(state.statuses).filter(s => s === 'done').length,
+    approvedMissions: Object.entries(state.statuses).filter(([, value]) => value === 'done').map(([id]) => id),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
 }
 
 async function uploadToCloudinary(file, submissionId) {
@@ -1319,7 +1467,7 @@ async function uploadToCloudinary(file, submissionId) {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'Cloudinary upload failed');
     return {
-      url: data.secure_url || data.url || '',
+      url: optimizeCloudinaryUrl(data.secure_url || data.url || ''),
       publicId: data.public_id || '',
       status: 'uploaded'
     };
@@ -1327,6 +1475,11 @@ async function uploadToCloudinary(file, submissionId) {
     console.warn('Cloudinary upload failed', error);
     return { url: '', publicId: '', status: 'cloudinary_failed' };
   }
+}
+
+function optimizeCloudinaryUrl(url) {
+  if (!url || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', '/upload/q_auto,f_auto/');
 }
 
 function referralLink() {
