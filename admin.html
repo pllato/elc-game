@@ -159,12 +159,17 @@ let submissions = [];
 let players = new Map();
 
 function signIn() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 }
 
 function signOut() {
   auth.signOut();
 }
+
+auth.getRedirectResult().catch(error => {
+  console.error(error);
+  showToast(authErrorMessage(error));
+});
 
 auth.onAuthStateChanged(async user => {
   const login = document.getElementById('login-card');
@@ -319,6 +324,13 @@ function showToast(message) {
   toast.textContent = message;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+function authErrorMessage(error) {
+  if (error?.code === 'auth/operation-not-allowed') return 'Google вход не включён в Firebase Authentication';
+  if (error?.code === 'auth/unauthorized-domain') return 'Домен pllato.github.io не разрешён в Firebase Authentication';
+  if (error?.code === 'auth/popup-blocked') return 'Браузер заблокировал окно входа';
+  return 'Не получилось войти через Google';
 }
 </script>
 </body>
