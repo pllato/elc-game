@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELC Quest Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@600;800&family=Inter:wght@400;600;700;800&display=swap');
+  :root {
+    --blue: #2B4EAE;
+    --blue-dark: #173172;
+    --red: #E8452A;
+    --green: #0F9F6E;
+    --amber: #C27803;
+    --bg: #F2F5FF;
+    --card: #FFFFFF;
+    --text: #10204A;
+    --muted: #6979AA;
+    --border: #DDE5FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: Inter, sans-serif; }
+  button, input, select, textarea { font: inherit; }
+  button { cursor: pointer; border: 0; border-radius: 8px; font-weight: 800; }
+  .topbar {
+    background: linear-gradient(140deg, var(--blue), var(--blue-dark));
+    color: #fff; padding: 18px; position: sticky; top: 0; z-index: 3;
+  }
+  .topbar-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 42px; height: 42px; border-radius: 10px; background: #fff; color: var(--blue); display: grid; place-items: center; font-family: Unbounded, sans-serif; font-weight: 800; }
+  h1 { font-family: Unbounded, sans-serif; font-size: 18px; line-height: 1.2; }
+  .subtitle { margin-top: 3px; color: rgba(255,255,255,.72); font-size: 12px; }
+  .userbox { text-align: right; font-size: 12px; color: rgba(255,255,255,.72); }
+  .userbox strong { color: #fff; display: block; font-size: 13px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 18px; }
+  .login-card, .panel, .submission {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  }
+  .login-card { max-width: 520px; margin: 48px auto; padding: 22px; }
+  .login-card h2, .panel h2 { font-size: 18px; margin-bottom: 8px; }
+  .login-card p, .empty, .small { color: var(--muted); font-size: 13px; line-height: 1.55; }
+  .primary { background: var(--red); color: #fff; padding: 12px 14px; }
+  .secondary { background: #E9EEFF; color: var(--blue); padding: 10px 12px; }
+  .success { background: var(--green); color: #fff; padding: 10px 12px; }
+  .danger { background: #FEE2E2; color: #B91C1C; padding: 10px 12px; }
+  .ghost { background: transparent; color: var(--blue); padding: 8px 0; }
+  .login-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .panel { padding: 14px; margin-bottom: 14px; }
+  .filters { display: grid; grid-template-columns: 1fr 180px 160px; gap: 10px; margin-top: 12px; }
+  .filters input, .filters select {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 11px 12px; color: var(--text); background: #fff;
+  }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 13px; }
+  .stat strong { display: block; color: var(--blue); font-family: Unbounded, sans-serif; font-size: 22px; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .submission { padding: 14px; margin-bottom: 10px; }
+  .submission-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .mission { font-weight: 900; font-size: 16px; }
+  .meta { margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .badge { display: inline-flex; align-items: center; border-radius: 999px; padding: 5px 9px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+  .pending { background: #FFF7ED; color: var(--amber); }
+  .approved { background: #D1FAE5; color: #047857; }
+  .rejected { background: #FEE2E2; color: #B91C1C; }
+  .note { margin: 10px 0; background: #F8FAFF; border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: var(--text); font-size: 13px; line-height: 1.5; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .file-link { color: var(--blue); font-weight: 800; text-decoration: none; }
+  .file-link:hover { text-decoration: underline; }
+  .hidden { display: none; }
+  .empty { padding: 22px; text-align: center; }
+  .toast {
+    position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 12px);
+    background: #101B3D; color: #fff; border-radius: 999px; padding: 11px 16px;
+    opacity: 0; pointer-events: none; transition: .2s; font-size: 13px; font-weight: 800;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  @media (max-width: 760px) {
+    .topbar-inner, .submission-head { display: block; }
+    .userbox { text-align: left; margin-top: 12px; }
+    .filters, .stats { grid-template-columns: 1fr; }
+    main { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="mark">ELC</div>
+      <div>
+        <h1>ELC Quest Admin</h1>
+        <div class="subtitle">Проверка заявок и начисление XP</div>
+      </div>
+    </div>
+    <div class="userbox" id="userbox">
+      <strong>Не авторизован</strong>
+      <span>Войдите через Google</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="login-card" id="login-card">
+    <h2>Вход администратора</h2>
+    <p>Админка читает заявки из Firebase и меняет статус выполнения. Доступ должен быть разрешён в Firestore rules для вашего Google email.</p>
+    <div class="login-actions">
+      <button class="primary" onclick="signIn()">Войти через Google</button>
+      <a class="ghost" href="./index.html">Открыть игру</a>
+    </div>
+    <p class="small" style="margin-top:14px">Если после входа будет ошибка доступа, нужно добавить ваш email в правила Firebase.</p>
+  </section>
+
+  <section class="hidden" id="admin-app">
+    <div class="stats">
+      <div class="stat"><strong id="stat-total">0</strong><span>Всего</span></div>
+      <div class="stat"><strong id="stat-pending">0</strong><span>На проверке</span></div>
+      <div class="stat"><strong id="stat-approved">0</strong><span>Зачтено</span></div>
+      <div class="stat"><strong id="stat-rejected">0</strong><span>Отклонено</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Заявки</h2>
+      <p class="small">Откройте файл, проверьте выполнение и нажмите нужное решение.</p>
+      <div class="filters">
+        <input id="search" placeholder="Поиск: имя, телефон, задание" oninput="renderSubmissions()">
+        <select id="status-filter" onchange="renderSubmissions()">
+          <option value="all">Все статусы</option>
+          <option value="pending">На проверке</option>
+          <option value="approved">Зачтено</option>
+          <option value="rejected">Отклонено</option>
+        </select>
+        <button class="secondary" onclick="loadSubmissions()">Обновить</button>
+      </div>
+    </div>
+
+    <div id="submissions"></div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyCrxjKU1rO1wrrfZ_UJ-TR1l2uDhsSzh1w',
+  authDomain: 'elc-english-quest.firebaseapp.com',
+  projectId: 'elc-english-quest',
+  messagingSenderId: '405162192751',
+  appId: '1:405162192751:web:c4c54883d2c2852988829a'
+};
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let submissions = [];
+let players = new Map();
+
+function signIn() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+}
+
+function signOut() {
+  auth.signOut();
+}
+
+auth.onAuthStateChanged(async user => {
+  const login = document.getElementById('login-card');
+  const app = document.getElementById('admin-app');
+  const userbox = document.getElementById('userbox');
+  if (!user) {
+    login.classList.remove('hidden');
+    app.classList.add('hidden');
+    userbox.innerHTML = '<strong>Не авторизован</strong><span>Войдите через Google</span>';
+    return;
+  }
+  userbox.innerHTML = `<strong>${escapeHtml(user.displayName || user.email || 'Админ')}</strong><span>${escapeHtml(user.email || '')} · <button class="ghost" onclick="signOut()">Выйти</button></span>`;
+  login.classList.add('hidden');
+  app.classList.remove('hidden');
+  await loadSubmissions();
+});
+
+async function loadSubmissions() {
+  try {
+    const playerSnap = await db.collection('players').get();
+    players = new Map(playerSnap.docs.map(doc => [doc.id, { id: doc.id, ...doc.data() }]));
+    const snap = await db.collection('submissions').orderBy('createdAt', 'desc').limit(100).get();
+    submissions = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderSubmissions();
+    showToast('Заявки обновлены');
+  } catch (error) {
+    console.error(error);
+    showToast('Нет доступа. Проверьте Firestore rules');
+    document.getElementById('submissions').innerHTML = `<div class="empty">Нет доступа к заявкам. Нужно разрешить ваш Google email в Firestore rules.</div>`;
+  }
+}
+
+async function setStatus(id, status) {
+  const submission = submissions.find(item => item.id === id);
+  if (!submission) return;
+  const payload = {
+    status,
+    reviewedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    reviewedBy: auth.currentUser?.email || ''
+  };
+  try {
+    await db.collection('submissions').doc(id).update(payload);
+    if (status === 'approved') await approvePlayerXP(submission);
+    showToast(status === 'approved' ? 'Заявка зачтена' : 'Заявка отклонена');
+    await loadSubmissions();
+  } catch (error) {
+    console.error(error);
+    showToast('Не получилось сохранить решение');
+  }
+}
+
+async function approvePlayerXP(submission) {
+  if (!submission.playerId) return;
+  const ref = db.collection('players').doc(submission.playerId);
+  await db.runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const data = snap.exists ? snap.data() : {};
+    const approvedMissions = Array.isArray(data.approvedMissions) ? data.approvedMissions : [];
+    if (approvedMissions.includes(submission.missionId)) return;
+    tx.set(ref, {
+      xp: Number(data.xp || 0) + Number(submission.xp || 0),
+      approvedCount: Number(data.approvedCount || 0) + 1,
+      approvedMissions: [...approvedMissions, submission.missionId],
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  });
+}
+
+function renderSubmissions() {
+  const query = document.getElementById('search').value.trim().toLowerCase();
+  const status = document.getElementById('status-filter').value;
+  const filtered = submissions.filter(item => {
+    const player = players.get(item.playerId) || {};
+    const haystack = [
+      item.playerName,
+      item.phone,
+      item.missionTitle,
+      item.note,
+      player.name,
+      player.phone
+    ].join(' ').toLowerCase();
+    return (status === 'all' || item.status === status) && (!query || haystack.includes(query));
+  });
+
+  document.getElementById('stat-total').textContent = submissions.length;
+  document.getElementById('stat-pending').textContent = submissions.filter(s => s.status === 'pending').length;
+  document.getElementById('stat-approved').textContent = submissions.filter(s => s.status === 'approved').length;
+  document.getElementById('stat-rejected').textContent = submissions.filter(s => s.status === 'rejected').length;
+
+  const root = document.getElementById('submissions');
+  if (!filtered.length) {
+    root.innerHTML = '<div class="empty">Заявок по этому фильтру нет.</div>';
+    return;
+  }
+  root.innerHTML = filtered.map(item => {
+    const player = players.get(item.playerId) || {};
+    const statusClass = item.status === 'approved' ? 'approved' : item.status === 'rejected' ? 'rejected' : 'pending';
+    const statusLabel = item.status === 'approved' ? 'Зачтено' : item.status === 'rejected' ? 'Отклонено' : 'На проверке';
+    const createdAt = formatDate(item.createdAt);
+    const file = item.fileUrl
+      ? `<a class="file-link" href="${escapeAttr(item.fileUrl)}" target="_blank" rel="noopener">Открыть файл</a>`
+      : `<span class="small">Файл не приложен (${escapeHtml(item.fileUploadStatus || 'no_file')})</span>`;
+    const actions = item.status === 'pending'
+      ? `<button class="success" onclick="setStatus('${item.id}', 'approved')">Зачесть +${Number(item.xp || 0)} XP</button>
+         <button class="danger" onclick="setStatus('${item.id}', 'rejected')">Отклонить</button>`
+      : `<span class="small">Проверил: ${escapeHtml(item.reviewedBy || 'админ')}</span>`;
+    return `
+      <article class="submission">
+        <div class="submission-head">
+          <div>
+            <div class="mission">${escapeHtml(item.missionId || '')}. ${escapeHtml(item.missionTitle || 'Задание')}</div>
+            <div class="meta">
+              Игрок: <strong>${escapeHtml(item.playerName || player.name || 'Без имени')}</strong> ·
+              ${escapeHtml(item.phone || player.phone || 'телефон не указан')}<br>
+              Дата: ${createdAt} · XP: ${Number(item.xp || 0)} · ID: ${escapeHtml(item.id)}
+            </div>
+          </div>
+          <span class="badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="note">${escapeHtml(item.note || 'Комментарий не указан')}</div>
+        <div class="actions">
+          ${file}
+          ${actions}
+        </div>
+      </article>`;
+  }).join('');
+}
+
+function formatDate(value) {
+  if (!value) return 'нет даты';
+  const date = value.toDate ? value.toDate() : new Date(value);
+  if (Number.isNaN(date.getTime())) return 'нет даты';
+  return date.toLocaleString('ru-RU', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  })[char]);
+}
+
+function escapeAttr(value) {
+  return escapeHtml(value).replace(/`/g, '&#096;');
+}
+
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
