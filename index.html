@@ -511,7 +511,7 @@
   }
   .story-media {
     border-radius: 50%; overflow: hidden; background: #111827;
-    width: min(68vw, 280px); aspect-ratio: 1;
+    width: min(64vw, 260px); height: min(64vw, 260px);
     display: grid; place-items: center; flex: 0 0 auto;
     touch-action: pan-y;
     box-shadow: 0 0 0 4px rgba(255,255,255,.05), 0 18px 44px rgba(0,0,0,.55);
@@ -1415,20 +1415,15 @@ function renderStoryViewer() {
       </div>
   `;
   if (story.fileUrl && String(story.fileType || '').startsWith('image/')) {
-    media.innerHTML = `${storyNavButtons()}<img src="${escapeAttr(story.fileUrl)}" alt="">`;
+    media.innerHTML = `<img src="${escapeAttr(story.fileUrl)}" alt="">`;
   } else if (story.fileUrl) {
-    media.innerHTML = `${storyNavButtons()}<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>`;
+    media.innerHTML = `<video src="${escapeAttr(story.fileUrl)}" autoplay controls playsinline></video>`;
   } else {
-    media.innerHTML = `${storyNavButtons()}<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>`;
+    media.innerHTML = `<div class="story-fallback">${escapeHtml(story.missionTitle || 'ELC Story')}</div>`;
   }
 }
 
-function storyNavButtons() {
-  return `
-    <button class="story-nav prev" onclick="event.stopPropagation(); prevStoryGroup(); renderStoryViewer()">‹</button>
-    <button class="story-nav next" onclick="event.stopPropagation(); nextStoryGroup(); renderStoryViewer()">›</button>
-  `;
-}
+function storyNavButtons() { return ''; }
 
 function preloadStoryMedia() {
   const flat = storyGroups.flatMap(group => group.items).slice(0, 12);
