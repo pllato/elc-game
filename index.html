@@ -466,11 +466,16 @@
     align-items: stretch; background: #060A16; color: #fff; z-index: 70; overflow: hidden;
   }
   .story-panel {
-    width: 100%; min-height: 100svh; display: flex; flex-direction: column;
-    padding: 12px 14px 16px; gap: 11px;
+    width: 100%; height: 100svh; display: flex; flex-direction: column; overflow: hidden;
   }
 
-  /* Прогресс-бар историй */
+  /* Фиксированная верхняя зона */
+  .story-top {
+    flex: 0 0 auto; padding: 14px 14px 8px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  /* Прогресс-бар */
   .story-progress { display: flex; gap: 4px; width: 100%; }
   .story-progress-seg {
     flex: 1; height: 2.5px; border-radius: 99px;
@@ -486,10 +491,10 @@
   .story-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .story-user .story-avatar {
     width: 40px; height: 40px; border: 0; border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(255,255,255,.3);
+    box-shadow: 0 0 0 2px rgba(255,255,255,.3); flex: 0 0 40px;
   }
   .story-user strong { display: block; font-size: 13.5px; font-weight: 700; }
-  .story-user span { display: block; color: rgba(255,255,255,.5); font-size: 11px; margin-top: 1px; }
+  .story-user span { display: block; color: rgba(255,255,255,.55); font-size: 11px; margin-top: 1px; }
   .story-close {
     border: 0; background: rgba(255,255,255,.12); color: #fff; border-radius: 50%;
     width: 38px; height: 38px; flex: 0 0 38px;
@@ -498,26 +503,47 @@
   }
   .story-close:hover { background: rgba(255,255,255,.2); }
 
-  .story-media {
-    position: relative; border-radius: 50%; overflow: visible; background: #111827;
-    width: min(78vw, 360px, 46svh); aspect-ratio: 1; align-self: center;
-    min-height: 0; display: grid; place-items: center; touch-action: pan-y;
-    box-shadow: 0 0 0 5px rgba(255,255,255,.05), 0 28px 64px rgba(0,0,0,.55);
+  /* Кружок + кнопки навигации в flex-ряду */
+  .story-media-wrap {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6px 12px 8px; gap: 10px;
   }
-  .story-media::before {
-    content: ''; position: absolute; inset: -4px; border-radius: 50%;
-    background: conic-gradient(from 120deg, rgba(255,255,255,.08), transparent 40%, rgba(255,255,255,.04) 70%, transparent);
-    pointer-events: none;
+  .story-media {
+    border-radius: 50%; overflow: hidden; background: #111827;
+    width: min(68vw, 280px); aspect-ratio: 1;
+    display: grid; place-items: center; flex: 0 0 auto;
+    touch-action: pan-y;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.05), 0 18px 44px rgba(0,0,0,.55);
   }
   .story-media video, .story-media img {
     width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+    pointer-events: none;
   }
   .story-fallback { color: rgba(255,255,255,.55); font-weight: 800; font-size: 14px; }
+
+  /* Кнопки навигации — в flex-ряду рядом с кружком */
+  .story-nav {
+    flex: 0 0 auto;
+    width: 40px; height: 40px; border: 0; border-radius: 50%;
+    background: rgba(255,255,255,.13); color: #fff; font-size: 22px;
+    display: grid; place-items: center; backdrop-filter: blur(6px);
+    transition: background .15s;
+    position: static; transform: none;
+  }
+  .story-nav:hover { background: rgba(255,255,255,.22); }
+
+  /* Скроллируемая нижняя зона */
+  .story-scroll {
+    flex: 1 1 auto; overflow-y: auto; padding: 0 14px 32px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .story-scroll::-webkit-scrollbar { display: none; }
 
   .story-detail {
     background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.09);
     border-radius: var(--radius); padding: 14px;
-    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   }
   .story-detail strong { display: block; font-size: 14px; font-weight: 800; margin-bottom: 5px; }
   .story-detail span { color: rgba(255,255,255,.62); font-size: 12.5px; line-height: 1.5; }
@@ -525,15 +551,15 @@
   .story-chip {
     border: 0; border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700;
     background: rgba(255,255,255,.11); color: #fff; white-space: nowrap;
-    backdrop-filter: blur(8px); transition: background .15s;
+    transition: background .15s;
   }
   .story-chip:hover { background: rgba(255,255,255,.18); }
   .story-chip.primary { background: var(--red); box-shadow: 0 3px 14px rgba(232,69,42,.35); }
   .story-chip.ghost { background: transparent; color: rgba(255,255,255,.5); padding-inline: 4px; }
   .story-stats { color: rgba(255,255,255,.6); font-size: 11.5px; font-weight: 700; }
-  .story-spacer { flex: 1; min-height: 2px; }
+  .story-spacer { display: none; }
   .practice-thread {
-    margin-top: 11px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 11px;
+    margin-top: 12px; border-top: 1px solid rgba(255,255,255,.09); padding-top: 12px;
     display: grid; gap: 8px;
   }
   .practice-reply {
@@ -556,16 +582,6 @@
   .thread-preview video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
   .story-actions { display: none; }
   .story-count { color: rgba(255,255,255,.4); font-size: 11px; margin-left: 6px; }
-  .story-nav {
-    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
-    width: 36px; height: 36px; border: 0; border-radius: 50%;
-    background: rgba(255,255,255,.14); color: #fff; font-size: 20px; font-weight: 900;
-    display: grid; place-items: center; backdrop-filter: blur(6px);
-    transition: background .15s;
-  }
-  .story-nav:hover { background: rgba(255,255,255,.22); }
-  .story-nav.prev { left: -46px; }
-  .story-nav.next { right: -46px; }
   .create-fields { display: grid; gap: 11px; margin: 13px 0; }
   .create-fields input, .create-fields textarea {
     width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius-sm); padding: 12px;
@@ -812,30 +828,38 @@
 
 <div class="overlay story-viewer" id="story-viewer">
   <div class="story-panel">
-    <!-- Прогресс-бар историй -->
-    <div class="story-progress" id="story-progress"></div>
-
-    <div class="story-head">
-      <div class="story-user">
-        <div class="story-avatar" id="story-user-avatar">EL</div>
-        <div>
-          <strong id="story-user-name">Участник</strong>
-          <span id="story-user-meta">Задание</span>
+    <!-- Верхняя фиксированная зона: прогресс + хедер -->
+    <div class="story-top">
+      <div class="story-progress" id="story-progress"></div>
+      <div class="story-head">
+        <div class="story-user">
+          <div class="story-avatar" id="story-user-avatar">EL</div>
+          <div>
+            <strong id="story-user-name">Участник</strong>
+            <span id="story-user-meta">Задание</span>
+          </div>
         </div>
+        <button class="story-close" onclick="closeStory()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
-      <button class="story-close" onclick="closeStory()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
     </div>
 
-    <div class="story-media" id="story-media"
-      onclick="nextStory()"
-      ontouchstart="storyTouchStart(event)"
-      ontouchend="storyTouchEnd(event)">
+    <!-- Кружок с кнопками навигации -->
+    <div class="story-media-wrap">
+      <button class="story-nav prev" onclick="event.stopPropagation(); prevStory()">‹</button>
+      <div class="story-media" id="story-media"
+        onclick="nextStory()"
+        ontouchstart="storyTouchStart(event)"
+        ontouchend="storyTouchEnd(event)">
+      </div>
+      <button class="story-nav next" onclick="event.stopPropagation(); nextStory()">›</button>
     </div>
 
-    <div class="story-detail" id="story-detail"></div>
-    <div class="story-spacer"></div>
+    <!-- Скроллируемая зона: детали + ветка -->
+    <div class="story-scroll">
+      <div class="story-detail" id="story-detail"></div>
+    </div>
   </div>
 </div>
 
